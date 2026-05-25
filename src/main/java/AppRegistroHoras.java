@@ -1,5 +1,7 @@
 // AppRegistroHoras.java
-import java.time.*;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Scanner;
 
 /**
@@ -86,7 +88,7 @@ public class AppRegistroHoras {
         try {
             Empleado empleado = sistema.obtenerEmpleadoPorId(id);
             sistema.registrarEntrada(empleado, LocalDate.now(), LocalTime.now());
-        } catch (EmpleadoNoEncontradoException | RegistroException e) {
+        } catch (RegistroException e) {
             System.out.println(e.getMessage());
         }
     }
