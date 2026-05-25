@@ -22,6 +22,11 @@ public abstract class Usuario {
         this.contrasena = contrasena;
     }
 
+    /**
+     * Devuelve el tipo de usuario.
+     */
+    public abstract String getTipoUsuario();
+
     // ==================== GETTERS Y SETTERS ====================
 
     public String getId() {

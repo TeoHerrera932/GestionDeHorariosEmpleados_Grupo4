@@ -8,7 +8,7 @@ import java.util.Scanner;
  */
 public class AppRegistroHoras {
 
-    private static final SistemaRegistro sistema = new SistemaRegistro();
+    private static final GestorRegistro sistema = new SistemaRegistro();
     private static final Scanner scanner = new Scanner(System.in);
 
     public static void main(String[] args) {
@@ -83,22 +83,32 @@ public class AppRegistroHoras {
         System.out.print("Ingrese ID del empleado: ");
         String id = scanner.nextLine();
 
-        sistema.buscarEmpleadoPorId(id).ifPresentOrElse(
-                empleado -> sistema.registrarEntrada(empleado, LocalDate.now(), LocalTime.now()),
-                () -> System.out.println("Empleado no encontrado.")
-        );
+        try {
+            Empleado empleado = sistema.obtenerEmpleadoPorId(id);
+            sistema.registrarEntrada(empleado, LocalDate.now(), LocalTime.now());
+        } catch (EmpleadoNoEncontradoException | RegistroException e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     private static void registrarSalida() {
         System.out.print("Ingrese ID del empleado: ");
         String id = scanner.nextLine();
-        sistema.registrarSalida(id, LocalDate.now(), LocalTime.now());
+        try {
+            sistema.registrarSalida(id, LocalDate.now(), LocalTime.now());
+        } catch (RegistroNoEncontradoException e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     private static void verRegistros() {
         System.out.print("Ingrese ID del empleado: ");
         String id = scanner.nextLine();
-        sistema.mostrarRegistrosEmpleado(id);
+        try {
+            sistema.mostrarRegistrosEmpleado(id);
+        } catch (EmpleadoNoEncontradoException e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     private static void calcularHorasExtras() {

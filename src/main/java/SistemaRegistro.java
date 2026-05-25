@@ -8,7 +8,7 @@ import java.util.Optional;
  * Clase que gestiona la lógica principal del sistema:
  * empleados y registros usando ArrayList.
  */
-public class SistemaRegistro {
+public class SistemaRegistro implements GestorRegistro {
 
     private final ArrayList<Empleado> empleados = new ArrayList<>();
     private final ArrayList<RegistroHora> registros = new ArrayList<>();
@@ -16,6 +16,7 @@ public class SistemaRegistro {
     /**
      * Agrega un nuevo empleado al sistema
      */
+    @Override
     public void agregarEmpleado(Empleado empleado) {
         empleados.add(empleado);
         System.out.println("Empleado agregado: " + empleado.getNombre());
@@ -30,10 +31,20 @@ public class SistemaRegistro {
                 .findFirst();
     }
 
+    @Override
+    public Empleado obtenerEmpleadoPorId(String id) throws EmpleadoNoEncontradoException {
+        return buscarEmpleadoPorId(id)
+                .orElseThrow(() -> new EmpleadoNoEncontradoException("Empleado no encontrado: " + id));
+    }
+
     /**
      * Registra entrada de un empleado
      */
-    public void registrarEntrada(Empleado empleado, LocalDate fecha, LocalTime horaEntrada) {
+    @Override
+    public void registrarEntrada(Empleado empleado, LocalDate fecha, LocalTime horaEntrada) throws RegistroException {
+        if (empleado == null) {
+            throw new RegistroException("Empleado inválido para registrar entrada.");
+        }
         RegistroHora registro = new RegistroHora(empleado, fecha, horaEntrada);
         registros.add(registro);
         System.out.println("Entrada registrada correctamente para " + empleado.getNombre());
@@ -42,22 +53,27 @@ public class SistemaRegistro {
     /**
      * Registra salida del empleado
      */
-    public void registrarSalida(String empleadoId, LocalDate fecha, LocalTime horaSalida) {
-        registros.stream()
+    @Override
+    public void registrarSalida(String empleadoId, LocalDate fecha, LocalTime horaSalida) throws RegistroNoEncontradoException {
+        Optional<RegistroHora> registroOpcional = registros.stream()
                 .filter(r -> r.getEmpleado().getId().equals(empleadoId) &&
                         r.getFecha().equals(fecha) &&
                         r.getHoraSalida() == null)
-                .findFirst()
-                .ifPresent(registro -> {
-                    registro.registrarSalida(horaSalida);
-                    System.out.println("Salida registrada correctamente.");
-                });
+                .findFirst();
+
+        if (registroOpcional.isEmpty()) {
+            throw new RegistroNoEncontradoException("No se encontró un registro pendiente de salida para el empleado: " + empleadoId);
+        }
+
+        registroOpcional.get().registrarSalida(horaSalida);
+        System.out.println("Salida registrada correctamente.");
     }
 
     /**
      * Muestra todos los registros de un empleado
      */
-    public void mostrarRegistrosEmpleado(String id) {
+    @Override
+    public void mostrarRegistrosEmpleado(String id) throws EmpleadoNoEncontradoException {
         System.out.println("\n=== REGISTROS DEL EMPLEADO ID: " + id + " ===");
         boolean encontrado = false;
 
@@ -74,7 +90,7 @@ public class SistemaRegistro {
         }
 
         if (!encontrado) {
-            System.out.println("No se encontraron registros para este empleado.");
+            throw new EmpleadoNoEncontradoException("No se encontraron registros para el empleado: " + id);
         }
     }
 

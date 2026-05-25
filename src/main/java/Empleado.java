@@ -45,4 +45,9 @@ public class Empleado extends Usuario {
         this.horaEntradaEstandar = entrada;
         this.horaSalidaEstandar = salida;
     }
+
+    @Override
+    public String getTipoUsuario() {
+        return "Empleado";
+    }
 }
