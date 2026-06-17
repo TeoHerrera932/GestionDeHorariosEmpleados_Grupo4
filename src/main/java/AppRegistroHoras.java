@@ -31,7 +31,7 @@ public class AppRegistroHoras {
      * Login simple de administrador
      */
     private static boolean loginAdministrador() {
-        System.out.print("Usuario admin: ");
+        System.out.print("ObjetosNegocio.Usuario admin: ");
         String user = scanner.nextLine();
         System.out.print("Contraseña: ");
         String pass = scanner.nextLine();

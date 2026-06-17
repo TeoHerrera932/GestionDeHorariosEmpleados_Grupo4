@@ -1,8 +1,10 @@
 // Empleado.java
+import ObjetosNegocio.Usuario;
+
 import java.time.LocalTime;
 
 /**
- * Clase Empleado que hereda de Usuario.
+ * Clase Empleado que hereda de ObjetosNegocio.Usuario.
  * Representa a un trabajador del sistema con información laboral.
  */
 public class Empleado extends Usuario {

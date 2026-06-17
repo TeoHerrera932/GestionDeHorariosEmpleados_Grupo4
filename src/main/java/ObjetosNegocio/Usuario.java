@@ -1,4 +1,4 @@
-// Usuario.java
+package ObjetosNegocio;// ObjetosNegocio.Usuario.java
 /**
  * Clase abstracta que representa un usuario del sistema.
  * Sirve como base para Empleado mediante herencia.
@@ -12,7 +12,7 @@ public abstract class Usuario {
     private String contrasena;
 
     /**
-     * Constructor de Usuario
+     * Constructor de ObjetosNegocio.Usuario
      */
     public Usuario(String id, String nombre, String apellido, String usuario, String contrasena) {
         this.id = id;
