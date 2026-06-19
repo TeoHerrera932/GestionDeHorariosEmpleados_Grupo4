@@ -1,4 +1,7 @@
+package persistencia;
+
 import excepciones.EmpleadoNoEncontradoException;
+import excepciones.PersistenciaException;
 import excepciones.RegistroException;
 import objetosNegocio.Empleado;
 
@@ -17,7 +20,7 @@ public interface GestorRegistro {
 
     void registrarEntrada(Empleado empleado, LocalDate fecha, LocalTime horaEntrada) throws RegistroException;
 
-    void registrarSalida(String empleadoId, LocalDate fecha, LocalTime horaSalida) throws RegistroNoEncontradoException;
+    void registrarSalida(String empleadoId, LocalDate fecha, LocalTime horaSalida) throws PersistenciaException;
 
     void mostrarRegistrosEmpleado(String id) throws EmpleadoNoEncontradoException;
 

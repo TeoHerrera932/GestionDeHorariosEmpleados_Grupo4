@@ -1,4 +1,4 @@
-// RegistroHora.java
+package persistencia;// Persistencia.RegistroHora.java
 import objetosNegocio.Empleado;
 
 import java.time.LocalDate;

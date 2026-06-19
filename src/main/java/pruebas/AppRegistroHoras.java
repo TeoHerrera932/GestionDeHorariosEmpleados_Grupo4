@@ -1,10 +1,13 @@
 package pruebas;// pruebas.AppRegistroHoras.java
 import objetosNegocio.Empleado;
+import persistencia.*;
+import excepciones.*;
 
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Scanner;
+import persistencia.SistemaRegistro;
 
 /**
  * Clase principal del sistema.
@@ -12,7 +15,7 @@ import java.util.Scanner;
  */
 public class AppRegistroHoras {
 
-    private static final GestorRegistro sistema = new SistemaRegistro();
+    public static GestorRegistro sistema = (GestorRegistro) new SistemaRegistro();
     private static final Scanner scanner = new Scanner(System.in);
 
     public static void main(String[] args) {
@@ -100,7 +103,7 @@ public class AppRegistroHoras {
         String id = scanner.nextLine();
         try {
             sistema.registrarSalida(id, LocalDate.now(), LocalTime.now());
-        } catch (RegistroNoEncontradoException e) {
+        } catch (PersistenciaException e) {
             System.out.println(e.getMessage());
         }
     }

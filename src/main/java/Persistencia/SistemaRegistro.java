@@ -1,7 +1,11 @@
-// SistemaRegistro.java
+package persistencia;// Persistencia.SistemaRegistro.java
 import excepciones.EmpleadoNoEncontradoException;
+import excepciones.PersistenciaException;
 import excepciones.RegistroException;
 import objetosNegocio.Empleado;
+import objetosServicio.*;
+import objetosNegocio.*;
+import persistencia.GestorRegistro;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -58,15 +62,17 @@ public class SistemaRegistro implements GestorRegistro {
      * Registra salida del empleado
      */
     @Override
-    public void registrarSalida(String empleadoId, LocalDate fecha, LocalTime horaSalida) throws RegistroNoEncontradoException {
+    public void registrarSalida(String empleadoId, LocalDate fecha, LocalTime horaSalida) throws PersistenciaException {
         Optional<RegistroHora> registroOpcional = registros.stream()
-                .filter(r -> r.getEmpleado().getId().equals(empleadoId) &&
-                        r.getFecha().equals(fecha) &&
-                        r.getHoraSalida() == null)
+                .filter(r -> {
+                    return r.getEmpleado().getId().equals(empleadoId) &&
+                            r.getFecha().equals(fecha) &&
+                            r.getHoraSalida() == null;
+                })
                 .findFirst();
 
         if (registroOpcional.isEmpty()) {
-            throw new RegistroNoEncontradoException("No se encontró un registro pendiente de salida para el empleado: " + empleadoId);
+            throw new PersistenciaException("No se encontró un registro pendiente de salida para el empleado: " + empleadoId);
         }
 
         registroOpcional.get().registrarSalida(horaSalida);
