@@ -1,4 +1,8 @@
 // SistemaRegistro.java
+import excepciones.EmpleadoNoEncontradoException;
+import excepciones.RegistroException;
+import objetosNegocio.Empleado;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -19,7 +23,7 @@ public class SistemaRegistro implements GestorRegistro {
     @Override
     public void agregarEmpleado(Empleado empleado) {
         empleados.add(empleado);
-        System.out.println("Empleado agregado: " + empleado.getNombre());
+        System.out.println("objetosNegocio.Empleado agregado: " + empleado.getNombre());
     }
 
     /**
@@ -34,7 +38,7 @@ public class SistemaRegistro implements GestorRegistro {
     @Override
     public Empleado obtenerEmpleadoPorId(String id) throws EmpleadoNoEncontradoException {
         return buscarEmpleadoPorId(id)
-                .orElseThrow(() -> new EmpleadoNoEncontradoException("Empleado no encontrado: " + id));
+                .orElseThrow(() -> new EmpleadoNoEncontradoException("objetosNegocio.Empleado no encontrado: " + id));
     }
 
     /**
@@ -43,7 +47,7 @@ public class SistemaRegistro implements GestorRegistro {
     @Override
     public void registrarEntrada(Empleado empleado, LocalDate fecha, LocalTime horaEntrada) throws RegistroException {
         if (empleado == null) {
-            throw new RegistroException("Empleado inválido para registrar entrada.");
+            throw new RegistroException("objetosNegocio.Empleado inválido para registrar entrada.");
         }
         RegistroHora registro = new RegistroHora(empleado, fecha, horaEntrada);
         registros.add(registro);

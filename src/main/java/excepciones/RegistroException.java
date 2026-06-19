@@ -1,3 +1,5 @@
+package excepciones;
+
 /**
  * Excepción base para errores del registro de horas.
  */

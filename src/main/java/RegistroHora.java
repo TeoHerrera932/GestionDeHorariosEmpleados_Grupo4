@@ -1,4 +1,6 @@
 // RegistroHora.java
+import objetosNegocio.Empleado;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.Duration;
@@ -9,7 +11,7 @@ import java.time.Duration;
  */
 public class RegistroHora {
 
-    private final Empleado empleado;        // Relación con Empleado
+    private final Empleado empleado;        // Relación con objetosNegocio.Empleado
     private final LocalDate fecha;
     private final LocalTime horaEntrada;
     private LocalTime horaSalida;

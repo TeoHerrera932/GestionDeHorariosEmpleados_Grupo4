@@ -1,4 +1,6 @@
-// AppRegistroHoras.java
+package pruebas;// pruebas.AppRegistroHoras.java
+import objetosNegocio.Empleado;
+
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -62,7 +64,7 @@ public class AppRegistroHoras {
             System.out.println("\n------------------- MENÚ PRINCIPAL -------------------");
             System.out.println("1. Registrar Entrada");
             System.out.println("2. Registrar Salida");
-            System.out.println("3. Ver Registros de Empleado");
+            System.out.println("3. Ver Registros de objetosNegocio.Empleado");
             System.out.println("4. Calcular Horas Extras");
             System.out.println("0. Salir");
             System.out.print("Seleccione una opción: ");

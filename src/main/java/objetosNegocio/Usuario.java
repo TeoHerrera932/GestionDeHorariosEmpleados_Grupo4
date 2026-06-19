@@ -1,7 +1,7 @@
 package objetosNegocio;// ObjetosNegocio.Usuario.java
 /**
  * Clase abstracta que representa un usuario del sistema.
- * Sirve como base para Empleado mediante herencia.
+ * Sirve como base para objetosNegocio.Empleado mediante herencia.
  */
 public abstract class Usuario {
 

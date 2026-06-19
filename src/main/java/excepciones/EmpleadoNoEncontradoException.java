@@ -1,3 +1,5 @@
+package excepciones;
+
 /**
  * Excepción lanzada cuando no se encuentra un empleado.
  */

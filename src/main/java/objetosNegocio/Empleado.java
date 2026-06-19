@@ -1,10 +1,9 @@
-// Empleado.java
-import objetosNegocio.Usuario;
+package objetosNegocio;// objetosNegocio.Empleado.java
 
 import java.time.LocalTime;
 
 /**
- * Clase Empleado que hereda de ObjetosNegocio.Usuario.
+ * Clase objetosNegocio.Empleado que hereda de ObjetosNegocio.Usuario.
  * Representa a un trabajador del sistema con información laboral.
  */
 public class Empleado extends Usuario {
@@ -14,7 +13,7 @@ public class Empleado extends Usuario {
     private LocalTime horaSalidaEstandar;
 
     /**
-     * Constructor completo de Empleado
+     * Constructor completo de objetosNegocio.Empleado
      */
     public Empleado(String id, String nombre, String apellido, String usuario,
                     String contrasena, String cargo,
@@ -50,6 +49,6 @@ public class Empleado extends Usuario {
 
     @Override
     public String getTipoUsuario() {
-        return "Empleado";
+        return "objetosNegocio.Empleado";
     }
 }
