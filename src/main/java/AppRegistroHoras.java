@@ -15,7 +15,7 @@ public class AppRegistroHoras {
 
     public static void main(String[] args) {
         System.out.println("=================================================");
-        System.out.println("     SISTEMA DE REGISTRO DE HORAS - POO");
+        System.out.println("     SISTEMA DE REGISTRO DE HORAS ");
         System.out.println("=================================================");
 
         if (!loginAdministrador()) {

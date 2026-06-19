@@ -1,5 +1,5 @@
 // Empleado.java
-import ObjetosNegocio.Usuario;
+import objetosNegocio.Usuario;
 
 import java.time.LocalTime;
 
