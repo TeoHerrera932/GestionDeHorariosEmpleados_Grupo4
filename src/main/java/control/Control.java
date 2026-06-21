@@ -7,6 +7,7 @@ import objetosNegocio.*;
 import interfaces.IFachada;
 import fachadas.FachadaArchivos;
 import InterfazUsuario.*;
+import interfazUsuario.DlgEmpleado;
 
 public class Control {
 
