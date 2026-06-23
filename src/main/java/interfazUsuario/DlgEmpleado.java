@@ -50,7 +50,6 @@ public class DlgEmpleado extends JDialog {
         panel.add(createFechaPanel(txtDiaNac, txtMesNac, txtAnioNac));
 
         // ... (agrega los demás campos de forma similar)
-        // Para ahorrar espacio aquí, te recomiendo usar un editor visual o GridBagLayout completo.
 
         JButton btnAceptar = new JButton("Aceptar");
         JButton btnCancelar = new JButton("Cancelar");
@@ -82,7 +81,7 @@ public class DlgEmpleado extends JDialog {
         txtCodigo.setText(empleado.getCodigoEmpleado());
         txtNombres.setText(empleado.getNombres());
         txtApellidos.setText(empleado.getApellidos());
-        // ... cargar resto de campos
+        
     }
 
     private void aceptar() {

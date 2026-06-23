@@ -4,19 +4,65 @@
  */
 package interfazUsuario;
 
+import control.Control;
+import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import objetosNegocio.Usuario;
 /**
  *
  * @author User
  */
 public class Login extends javax.swing.JFrame {
-    
-    private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(Login.class.getName());
-
+    private Control control;
     /**
      * Creates new form Login
      */
     public Login() {
+        control = new Control();
         initComponents();
+        initListeners();
+    }
+   private void initListeners() {
+        jButton1.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                realizarLogin();
+            }
+        });
+    }
+    private void realizarLogin() {
+        String usuario = jTextField1.getText().trim();
+        String contrasena = new String(jPasswordField1.getPassword()).trim();
+
+        if (usuario.isEmpty() || contrasena.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Por favor ingrese usuario y contraseña",
+                    "Campos vacíos", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        try {
+            Usuario user = control.login(usuario, contrasena);
+
+            if (user != null) {
+                this.dispose(); // Cerrar ventana de login
+
+                if ("admin".equalsIgnoreCase(user.getCargo()) ||
+                    "soporte".equalsIgnoreCase(user.getCargo())) {
+                    new VentanaPrincipalAdmin(control).setVisible(true);
+                } else {
+                    new VentanaPrincipalEmpleado(control).setVisible(true);
+                }
+            } else {
+                JOptionPane.showMessageDialog(this, "Usuario o contraseña incorrectos",
+                        "Error de acceso", JOptionPane.ERROR_MESSAGE);
+                jPasswordField1.setText("");
+                jTextField1.requestFocus();
+            }
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(),
+                    "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     /**
@@ -112,24 +158,17 @@ public class Login extends javax.swing.JFrame {
      * @param args the command line arguments
      */
     public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
+       try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {
                     javax.swing.UIManager.setLookAndFeel(info.getClassName());
                     break;
                 }
             }
-        } catch (ReflectiveOperationException | javax.swing.UnsupportedLookAndFeelException ex) {
-            logger.log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            java.util.logging.Logger.getLogger(Login.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
-        //</editor-fold>
 
-        /* Create and display the form */
         java.awt.EventQueue.invokeLater(() -> new Login().setVisible(true));
     }
 

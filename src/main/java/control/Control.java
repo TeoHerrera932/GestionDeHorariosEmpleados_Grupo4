@@ -6,7 +6,7 @@ import objetosServicio.*;
 import objetosNegocio.*;
 import interfaces.IFachada;
 import fachadas.FachadaArchivos;
-import InterfazUsuario.*;
+import interfazUsuario.*;
 import interfazUsuario.DlgEmpleado;
 
 public class Control {
@@ -155,16 +155,7 @@ public class Control {
         }
     }
 
-    public Tabla getTablaEmpleados(JFrame frame){
-        ArrayList listaEmpleados = null;
-        try{
-            listaEmpleados = fachada.consultaEmpleados();
-        }catch (Exception e){
-            JOptionPane.showMessageDialog(frame,e.getMessage(),"Error",JOptionPane.ERROR_MESSAGE);
-        }
-        return new Tabla("Empleados", nombresColumnasTablaEmpleados,
-                conversiones.listaTablaEmpleados(listaEmpleados));
-    }
+    
 
     // ====================== MÉTODOS PARA USUARIOS ======================
 
@@ -183,5 +174,8 @@ public class Control {
             // Manejo silencioso o log
         }
         return null;
+    }
+    public IFachada getFachada() {
+        return fachada;
     }
 }
