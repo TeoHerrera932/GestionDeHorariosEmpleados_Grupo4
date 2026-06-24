@@ -108,7 +108,32 @@ public class VentanaPrincipalEmpleado extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        // TODO add your handling code here:
+        String horaIngreso = jFormattedTextField1.getText().trim();
+    String horaSalida = jFormattedTextField2.getText().trim();
+
+    if (horaIngreso.isEmpty()) {
+        JOptionPane.showMessageDialog(this, 
+            "Debe ingresar al menos la hora de ingreso", 
+            "Datos incompletos", JOptionPane.WARNING_MESSAGE);
+        return;
+    }
+
+    // Aquí debes obtener el código del empleado logueado
+    // Por ahora lo pedimos, luego lo puedes mejorar con sesión
+    String codigoEmpleado = JOptionPane.showInputDialog(this, 
+        "Ingrese su Código de Empleado:", 
+        "Registro de Asistencia", 
+        JOptionPane.QUESTION_MESSAGE);
+
+    if (codigoEmpleado == null || codigoEmpleado.trim().isEmpty()) {
+        return;
+    }
+
+    control.registrarAsistencia(codigoEmpleado.trim(), horaIngreso, horaSalida);
+    
+    // Limpiar campos después de registrar
+    jFormattedTextField1.setText("");
+    jFormattedTextField2.setText("");
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jFormattedTextField1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jFormattedTextField1ActionPerformed
