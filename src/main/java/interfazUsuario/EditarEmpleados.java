@@ -3,6 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 package interfazUsuario;
+import control.Control;
 import interfaces.IFachada;
 import objetosNegocio.Empleado;
 import excepciones.FachadaException;
@@ -10,18 +11,20 @@ import fachadas.FachadaArchivos;
 import javax.swing.table.DefaultTableModel;
 import java.util.ArrayList;
 import javax.swing.JOptionPane;
+import control.UtileriasGUI;
 /**
  *
  * @author User
  */
 public class EditarEmpleados extends javax.swing.JFrame {
-    
+    private Control control;
     private IFachada fachada;
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(EditarEmpleados.class.getName());
 
     public EditarEmpleados(IFachada fachada) {
-        initComponents();
         this.fachada = fachada;
+        this.control = new Control();     // ← Inicializamos el control
+        initComponents();
         cargarTabla();
     }
     
@@ -80,6 +83,7 @@ public class EditarEmpleados extends javax.swing.JFrame {
         jButton1.addActionListener(this::jButton1ActionPerformed);
 
         jButton2.setText("Nuevo");
+        jButton2.addActionListener(this::jButton2ActionPerformed);
 
         jButton4.setText("Eliminar");
         jButton4.addActionListener(this::jButton4ActionPerformed);
@@ -153,7 +157,28 @@ public class EditarEmpleados extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
-        cargarTabla();
+        int fila = jTable1.getSelectedRow();
+        if (fila == -1) {
+            JOptionPane.showMessageDialog(this, "Seleccione un empleado para actualizar");
+            return;
+        }
+
+        String codigo = jTable1.getValueAt(fila, 0).toString();
+
+        try {
+            Empleado emp = fachada.obten(new Empleado(codigo));
+            if (emp == null) {
+                JOptionPane.showMessageDialog(this, "No se encontró el empleado");
+                return;
+            }
+
+            StringBuffer respuesta = new StringBuffer("");
+            new DlgEmpleado(this, control, emp, UtileriasGUI.ACTUALIZAR, respuesta);
+            cargarTabla();
+
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }//GEN-LAST:event_jButton5ActionPerformed
 
     private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
@@ -162,15 +187,20 @@ public class EditarEmpleados extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "Seleccione un empleado");
             return;
         }
-       
-        String codigo = jTable1.getValueAt(fila,0).toString();
-        Empleado empleado = new Empleado(codigo);
-        try {
-            fachada.elimina(empleado);
-            JOptionPane.showMessageDialog(this, "Empleado eliminado");
-            cargarTabla();
-        } catch (FachadaException ex) {
-            JOptionPane.showMessageDialog(this, ex.getMessage());
+
+        String codigo = jTable1.getValueAt(fila, 0).toString();
+        int confirm = JOptionPane.showConfirmDialog(this, 
+                "¿Está seguro de eliminar este empleado?", 
+                "Confirmar Eliminación", JOptionPane.YES_NO_OPTION);
+
+        if (confirm == JOptionPane.YES_OPTION) {
+            try {
+                fachada.elimina(new Empleado(codigo));
+                JOptionPane.showMessageDialog(this, "Empleado eliminado correctamente");
+                cargarTabla();
+            } catch (FachadaException ex) {
+                JOptionPane.showMessageDialog(this, ex.getMessage());
+            }
         }
     }//GEN-LAST:event_jButton4ActionPerformed
 
@@ -208,6 +238,13 @@ public class EditarEmpleados extends javax.swing.JFrame {
         );
         } 
     }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        StringBuffer respuesta = new StringBuffer("");
+        Empleado nuevo = new Empleado();
+        new DlgEmpleado(this, control, nuevo, UtileriasGUI.AGREGAR, respuesta);
+        cargarTabla();
+    }//GEN-LAST:event_jButton2ActionPerformed
 
    
     public static void main(String args[]) {

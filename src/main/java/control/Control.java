@@ -51,107 +51,98 @@ public class Control {
     // ====================== MÉTODOS PARA EMPLEADOS ======================
 
     public void agregaEmpleado(JFrame frame){
-        Empleado empleado, bEmpleado = null;
+        
         StringBuffer respuesta = new StringBuffer("");
-        DlgEmpleado dlgEmpleado;
-        //Captura el código del empleado
-        String codigo = JOptionPane.showInputDialog(frame,"Código de Empleado:",
+        String codigo = JOptionPane.showInputDialog(frame, "Código de Empleado:",
                 "Agregar Empleado", JOptionPane.QUESTION_MESSAGE);
         if (codigo == null) return;
 
-        empleado = new Empleado(codigo);
-        try{
-            bEmpleado = fachada.obten(empleado);
-        }catch(Exception e){
-            JOptionPane.showMessageDialog(frame,e.getMessage(),"Error",JOptionPane.ERROR_MESSAGE);
+        Empleado empleado = new Empleado(codigo);
+
+        try {
+            Empleado existe = fachada.obten(empleado);
+            if (existe != null) {
+                new DlgEmpleado(frame, this, existe, UtileriasGUI.DESPLEGAR, respuesta);
+                return;
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(frame, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
 
-        if (bEmpleado != null){
-            dlgEmpleado = new DlgEmpleado(frame,"El empleado ya está registrado",
-                    true, bEmpleado, UtileriasGUI.DESPLEGAR, respuesta);
-            return;
-        }
+        new DlgEmpleado(frame, this, empleado, UtileriasGUI.AGREGAR, respuesta);
 
-        dlgEmpleado = new DlgEmpleado(frame, "Captura Datos del Empleado", true, empleado,
-                UtileriasGUI.AGREGAR, respuesta);
+        if (respuesta.toString().contains(UtileriasGUI.CANCELAR)) return;
 
-        if (respuesta.substring(0).equals(UtileriasGUI.CANCELAR)) return;
-
-        try{
+        try {
             fachada.agrega(empleado);
-            JOptionPane.showMessageDialog(frame,"Empleado agregado correctamente");
-        }catch (Exception e){
-            JOptionPane.showMessageDialog(frame,e.getMessage(),"Error",JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(frame, "Empleado agregado correctamente", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(frame, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
     public void actualizaEmpleado(JFrame frame){
-        Empleado empleado;
         StringBuffer respuesta = new StringBuffer("");
-        DlgEmpleado dlgEmpleado;
-
         String codigo = JOptionPane.showInputDialog(frame, "Código del empleado:",
                 "Actualizar Empleado", JOptionPane.QUESTION_MESSAGE);
         if (codigo == null) return;
 
-        empleado = new Empleado(codigo);
-        try{
+        Empleado empleado = new Empleado(codigo);
+
+        try {
             empleado = fachada.obten(empleado);
-        }catch(Exception e){
-            JOptionPane.showMessageDialog(frame,e.getMessage(),"Error",JOptionPane.ERROR_MESSAGE);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(frame, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        if (empleado == null){
-            JOptionPane.showMessageDialog(frame,"El empleado no existe","Error",JOptionPane.ERROR_MESSAGE);
+        if (empleado == null) {
+            JOptionPane.showMessageDialog(frame, "El empleado no existe", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        dlgEmpleado = new DlgEmpleado(frame,"Edita Datos del Empleado", true, empleado,
-                UtileriasGUI.ACTUALIZAR, respuesta);
+        new DlgEmpleado(frame, this, empleado, UtileriasGUI.ACTUALIZAR, respuesta);
 
-        if (respuesta.substring(0).equals(UtileriasGUI.CANCELAR)) return;
+        if (respuesta.toString().contains(UtileriasGUI.CANCELAR)) return;
 
-        try{
+        try {
             fachada.actualiza(empleado);
-            JOptionPane.showMessageDialog(frame,"Empleado actualizado correctamente");
-        }catch(Exception e){
-            JOptionPane.showMessageDialog(frame,e.getMessage(),"Error",JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(frame, "Empleado actualizado correctamente", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(frame, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
     public void eliminaEmpleado(JFrame frame){
-        Empleado empleado;
-        StringBuffer respuesta = new StringBuffer();
-        DlgEmpleado dlgEmpleado;
-
         String codigo = JOptionPane.showInputDialog(frame, "Código del empleado",
                 "Eliminar Empleado", JOptionPane.QUESTION_MESSAGE);
         if (codigo == null) return;
 
-        empleado = new Empleado(codigo);
-        try{
+        Empleado empleado = new Empleado(codigo);
+
+        try {
             empleado = fachada.obten(empleado);
-        }catch(Exception e){
-            JOptionPane.showMessageDialog(frame,e.getMessage(),"Error",JOptionPane.ERROR_MESSAGE);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(frame, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        if (empleado == null){
-            JOptionPane.showMessageDialog(frame,"El empleado no existe","Error",JOptionPane.ERROR_MESSAGE);
+        if (empleado == null) {
+            JOptionPane.showMessageDialog(frame, "El empleado no existe", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        dlgEmpleado = new DlgEmpleado(frame, "Empleado a eliminar", true, empleado,
-                UtileriasGUI.ELIMINAR, respuesta);
+        int confirm = JOptionPane.showConfirmDialog(frame, 
+            "¿Está seguro de eliminar al empleado " + empleado.getNombres() + " " + empleado.getApellidos() + "?",
+            "Confirmar Eliminación", JOptionPane.YES_NO_OPTION);
 
-        if (respuesta.substring(0).equals(UtileriasGUI.CANCELAR)) return;
-
-        try{
-            fachada.elimina(empleado);
-            JOptionPane.showMessageDialog(frame,"Empleado eliminado correctamente");
-        }catch(Exception e){
-            JOptionPane.showMessageDialog(frame,e.getMessage(),"Error",JOptionPane.ERROR_MESSAGE);
+        if (confirm == JOptionPane.YES_OPTION) {
+            try {
+                fachada.elimina(empleado);
+                JOptionPane.showMessageDialog(frame, "Empleado eliminado correctamente", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(frame, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
         }
     }
 
