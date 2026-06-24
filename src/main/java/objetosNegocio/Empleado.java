@@ -22,6 +22,10 @@ public class Empleado {
     private String celular;
 
     public Empleado() {
+        
+    }
+    public Empleado(String codigoEmpleado){
+       this.codigoEmpleado = codigoEmpleado; 
     }
 
     // Constructor principal (sin CI)
@@ -49,10 +53,21 @@ public class Empleado {
         this.celular = celular;
     }
 
-    public Empleado(String codigoEmpleado) {
-        this.codigoEmpleado = codigoEmpleado;
+@Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        
+        Empleado empleado = (Empleado) obj;
+        
+        // Comparar por código de empleado (clave principal)
+        return codigoEmpleado != null && codigoEmpleado.equals(empleado.codigoEmpleado);
     }
 
+    @Override
+    public int hashCode() {
+        return codigoEmpleado != null ? codigoEmpleado.hashCode() : 0;
+    }
     // ==================== GETTERS Y SETTERS ====================
 
     public String getCodigoEmpleado() { return codigoEmpleado; }

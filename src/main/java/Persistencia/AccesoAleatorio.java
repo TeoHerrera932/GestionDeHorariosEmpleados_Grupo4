@@ -22,13 +22,11 @@ public abstract class AccesoAleatorio {
         for (int i = 0; i < tam; i++) {
             cadena[i] = archivo.readChar();
         }
-        return new String(cadena).trim();
+        return new String(cadena).trim().replace("\0", "");
     }
 
     protected void escribeString(String cadena, int tam) throws IOException {
-        if (cadena == null) {
-            cadena = "";
-        }
+        if (cadena == null) cadena = "";
         StringBuffer buffer = new StringBuffer(cadena);
         buffer.setLength(tam);
         archivo.writeChars(buffer.toString());
