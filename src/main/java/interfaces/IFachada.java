@@ -2,6 +2,7 @@ package interfaces;
 
 import java.util.ArrayList;
 import excepciones.FachadaException;
+import objetosNegocio.Asistencia;
 import objetosNegocio.Empleado;
 import objetosNegocio.Usuario;
 
@@ -21,6 +22,8 @@ public interface IFachada {
     public void elimina(Usuario usuario) throws FachadaException;
     public ArrayList consultaUsuarios() throws FachadaException;
 
+    public void registraAsistencia(Asistencia asistencia) throws FachadaException;
+    public ArrayList consultaAsistenciasPorEmpleado(String codigoEmpleado) throws FachadaException;
     // Método especial para Login
     public Usuario obtenPorUsuario(String nombreUsuario) throws FachadaException;
 }

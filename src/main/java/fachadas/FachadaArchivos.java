@@ -6,17 +6,22 @@ import excepciones.PersistenciaException;
 import interfaces.IFachada;
 import objetosNegocio.Empleado;
 import objetosNegocio.Usuario;
+import objetosNegocio.Asistencia;
+import persistencia.Asistencias;
 import persistencia.Empleados;
 import persistencia.Usuarios;
 
+
 public class FachadaArchivos implements IFachada {
 
+    private Asistencias catalogoAsistencias;
     private Empleados catalogoEmpleados;
     private Usuarios catalogoUsuarios;
 
     public FachadaArchivos() {
         catalogoEmpleados = new Empleados("empleados.dat");
         catalogoUsuarios = new Usuarios("usuarios.dat");
+        catalogoAsistencias = new Asistencias("asistencias.dat");
     }
 
     // ====================== EMPLEADOS ======================
@@ -135,6 +140,23 @@ public class FachadaArchivos implements IFachada {
             return catalogoUsuarios.obtenPorUsuario(nombreUsuario);
         } catch (PersistenciaException pe) {
             throw new FachadaException("No se puede obtener el usuario por nombre", pe);
+        }
+    }
+    // ====================== ASISTENCIAS ======================
+
+    public void registraAsistencia(Asistencia asistencia) throws FachadaException {
+        try {
+            catalogoAsistencias.agrega(asistencia);
+        } catch (PersistenciaException pe) {
+            throw new FachadaException("No se puede registrar la asistencia", pe);
+        }
+    }
+
+    public ArrayList consultaAsistenciasPorEmpleado(String codigoEmpleado) throws FachadaException {
+        try {
+            return new ArrayList(catalogoAsistencias.listaPorEmpleado(codigoEmpleado));
+        } catch (PersistenciaException pe) {
+            throw new FachadaException("No se puede obtener las asistencias", pe);
         }
     }
 }

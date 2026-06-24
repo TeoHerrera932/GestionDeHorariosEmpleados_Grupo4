@@ -2,6 +2,8 @@ package control;
 
 import javax.swing.*;
 import java.util.ArrayList;
+
+import excepciones.FachadaException;
 import objetosServicio.*;
 import objetosNegocio.*;
 import interfaces.IFachada;
@@ -165,6 +167,43 @@ public class Control {
             // Manejo silencioso o log
         }
         return null;
+    }
+    public void registrarAsistencia(String codigoEmpleado, String horaIngreso, String horaSalida) {
+        try {
+            // Crear fecha actual
+            java.util.Calendar cal = java.util.Calendar.getInstance();
+            Fecha fechaActual = new Fecha(
+                    cal.get(java.util.Calendar.DAY_OF_MONTH),
+                    cal.get(java.util.Calendar.MONTH) + 1,
+                    cal.get(java.util.Calendar.YEAR)
+            );
+
+            Asistencia asistencia = new Asistencia(codigoEmpleado, fechaActual, horaIngreso);
+
+            if (horaSalida != null && !horaSalida.trim().isEmpty()) {
+                asistencia.setHoraSalida(horaSalida);
+            }
+
+            fachada.registraAsistencia(asistencia);
+
+            JOptionPane.showMessageDialog(null,
+                    "✅ Asistencia registrada correctamente\n\n" +
+                            "Empleado: " + codigoEmpleado + "\n" +
+                            "Fecha: " + fechaActual + "\n" +
+                            "Hora Ingreso: " + horaIngreso +
+                            (horaSalida != null && !horaSalida.isEmpty() ? "\nHora Salida: " + horaSalida : ""),
+                    "Registro Exitoso",
+                    JOptionPane.INFORMATION_MESSAGE);
+
+        } catch (FachadaException ex) {
+            JOptionPane.showMessageDialog(null,
+                    "Error al registrar asistencia:\n" + ex.getMessage(),
+                    "Error", JOptionPane.ERROR_MESSAGE);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(null,
+                    "Error inesperado: " + ex.getMessage(),
+                    "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
     public IFachada getFachada() {
         return fachada;
