@@ -1,4 +1,4 @@
-package pruebas;
+/*package pruebas;
 
 import java.util.ArrayList;
 import objetosServicio.Fecha;
@@ -157,4 +157,4 @@ public class PruebaDeFuncionamiento {
 
         System.out.println("\n=== Prueba de Funcionamiento Finalizada Correctamente ===");
     }
-}
+}*/

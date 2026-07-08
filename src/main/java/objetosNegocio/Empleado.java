@@ -12,8 +12,7 @@ public class Empleado {
     private String estadoCivil;
     private String direccion;
     private String correo;
-    private String cargo;
-    private String centroDeTrabajo;
+    private Cargo cargo;                    // ← Objeto Cargo
     private Fecha fechaIngreso;
     private Fecha fechaBaja;
     private String usuario;
@@ -22,17 +21,16 @@ public class Empleado {
     private String celular;
 
     public Empleado() {
-        
-    }
-    public Empleado(String codigoEmpleado){
-       this.codigoEmpleado = codigoEmpleado; 
     }
 
-    // Constructor principal (sin CI)
+    public Empleado(String codigoEmpleado) {
+        this.codigoEmpleado = codigoEmpleado;
+    }
+
     public Empleado(String codigoEmpleado, String nombres, String apellidos,
                     Fecha fechaNacimiento, String genero, String estadoCivil,
-                    String direccion, String correo, String cargo,
-                    String centroDeTrabajo, Fecha fechaIngreso, Fecha fechaBaja,
+                    String direccion, String correo, Cargo cargo,
+                    Fecha fechaIngreso, Fecha fechaBaja,
                     String usuario, String cedula, String horario, String celular) {
 
         this.codigoEmpleado = codigoEmpleado;
@@ -44,7 +42,6 @@ public class Empleado {
         this.direccion = direccion;
         this.correo = correo;
         this.cargo = cargo;
-        this.centroDeTrabajo = centroDeTrabajo;
         this.fechaIngreso = fechaIngreso;
         this.fechaBaja = fechaBaja;
         this.usuario = usuario;
@@ -53,21 +50,6 @@ public class Empleado {
         this.celular = celular;
     }
 
-@Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
-        
-        Empleado empleado = (Empleado) obj;
-        
-        // Comparar por código de empleado (clave principal)
-        return codigoEmpleado != null && codigoEmpleado.equals(empleado.codigoEmpleado);
-    }
-
-    @Override
-    public int hashCode() {
-        return codigoEmpleado != null ? codigoEmpleado.hashCode() : 0;
-    }
     // ==================== GETTERS Y SETTERS ====================
 
     public String getCodigoEmpleado() { return codigoEmpleado; }
@@ -94,11 +76,8 @@ public class Empleado {
     public String getCorreo() { return correo; }
     public void setCorreo(String correo) { this.correo = correo; }
 
-    public String getCargo() { return cargo; }
-    public void setCargo(String cargo) { this.cargo = cargo; }
-
-    public String getCentroDeTrabajo() { return centroDeTrabajo; }
-    public void setCentroDeTrabajo(String centroDeTrabajo) { this.centroDeTrabajo = centroDeTrabajo; }
+    public Cargo getCargo() { return cargo; }
+    public void setCargo(Cargo cargo) { this.cargo = cargo; }
 
     public Fecha getFechaIngreso() { return fechaIngreso; }
     public void setFechaIngreso(Fecha fechaIngreso) { this.fechaIngreso = fechaIngreso; }
@@ -119,7 +98,20 @@ public class Empleado {
     public void setCelular(String celular) { this.celular = celular; }
 
     @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Empleado empleado = (Empleado) obj;
+        return codigoEmpleado != null && codigoEmpleado.equals(empleado.codigoEmpleado);
+    }
+
+    @Override
+    public int hashCode() {
+        return codigoEmpleado != null ? codigoEmpleado.hashCode() : 0;
+    }
+
+    @Override
     public String toString() {
-        return codigoEmpleado + " - " + nombres + " " + apellidos + " | " + cargo;
+        return codigoEmpleado + " - " + nombres + " " + apellidos;
     }
 }

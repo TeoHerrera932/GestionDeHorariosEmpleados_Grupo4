@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import objetosNegocio.Empleado;
+import objetosNegocio.Cargo;
 import objetosServicio.Fecha;
 import control.UtileriasGUI;
 import control.Control;
@@ -16,9 +17,9 @@ public class DlgEmpleado extends JDialog {
     private Control control;
     private StringBuffer respuesta;
 
-    // Componentes del formulario
+    // Componentes
     private JTextField txtCodigo, txtNombres, txtApellidos, txtCedula, txtGenero,
-            txtEstadoCivil, txtDireccion, txtCorreo, txtCargo,
+            txtEstadoCivil, txtDireccion, txtCorreo, txtNombreCargo,
             txtCentroTrabajo, txtUsuario, txtHorario, txtCelular;
 
     private JTextField txtDiaNac, txtMesNac, txtAnioNac;
@@ -37,10 +38,6 @@ public class DlgEmpleado extends JDialog {
         setLocationRelativeTo(frame);
         setSize(680, 620);
         setVisible(true);
-    }
-
-    public DlgEmpleado(JFrame frame, String el_empleado_ya_está_registrado, boolean b, Empleado bEmpleado, String DESPLEGAR, StringBuffer respuesta) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
     private void initComponents() {
@@ -77,11 +74,11 @@ public class DlgEmpleado extends JDialog {
         panel.add(new JLabel("Correo Electrónico:"));
         panel.add(txtCorreo = new JTextField(25));
 
-        panel.add(new JLabel("Cargo:"));
-        panel.add(txtCargo = new JTextField(20));
+        panel.add(new JLabel("Nombre del Cargo:"));
+        panel.add(txtNombreCargo = new JTextField(25));
 
         panel.add(new JLabel("Centro de Trabajo:"));
-        panel.add(txtCentroTrabajo = new JTextField(20));
+        panel.add(txtCentroTrabajo = new JTextField(25));
 
         panel.add(new JLabel("Usuario:"));
         panel.add(txtUsuario = new JTextField(15));
@@ -113,7 +110,6 @@ public class DlgEmpleado extends JDialog {
         add(panel, BorderLayout.CENTER);
         add(botones, BorderLayout.SOUTH);
 
-        // Si solo se va a ver, deshabilitar edición
         if ("DESPLEGAR".equals(operacion)) {
             setEditableAll(false);
             btnAceptar.setEnabled(false);
@@ -131,6 +127,8 @@ public class DlgEmpleado extends JDialog {
     }
 
     private void setEditableAll(boolean editable) {
+        Component[] components = getContentPane().getComponents();
+        // Simplificado: deshabilitar campos principales
         txtCodigo.setEditable(editable);
         txtNombres.setEditable(editable);
         txtApellidos.setEditable(editable);
@@ -139,7 +137,7 @@ public class DlgEmpleado extends JDialog {
         txtEstadoCivil.setEditable(editable);
         txtDireccion.setEditable(editable);
         txtCorreo.setEditable(editable);
-        txtCargo.setEditable(editable);
+        txtNombreCargo.setEditable(editable);
         txtCentroTrabajo.setEditable(editable);
         txtUsuario.setEditable(editable);
         txtHorario.setEditable(editable);
@@ -155,11 +153,14 @@ public class DlgEmpleado extends JDialog {
         txtEstadoCivil.setText(empleado.getEstadoCivil());
         txtDireccion.setText(empleado.getDireccion());
         txtCorreo.setText(empleado.getCorreo());
-        txtCargo.setText(empleado.getCargo());
-        txtCentroTrabajo.setText(empleado.getCentroDeTrabajo());
         txtUsuario.setText(empleado.getUsuario());
         txtHorario.setText(empleado.getHorario());
         txtCelular.setText(empleado.getCelular());
+
+        if (empleado.getCargo() != null) {
+            txtNombreCargo.setText(empleado.getCargo().getNombreCargo());
+            txtCentroTrabajo.setText(empleado.getCargo().getCentroTrabajo());
+        }
     }
 
     private void aceptar(ActionEvent e) {
@@ -172,11 +173,16 @@ public class DlgEmpleado extends JDialog {
             empleado.setEstadoCivil(txtEstadoCivil.getText().trim());
             empleado.setDireccion(txtDireccion.getText().trim());
             empleado.setCorreo(txtCorreo.getText().trim());
-            empleado.setCargo(txtCargo.getText().trim());
-            empleado.setCentroDeTrabajo(txtCentroTrabajo.getText().trim());
             empleado.setUsuario(txtUsuario.getText().trim());
             empleado.setHorario(txtHorario.getText().trim());
             empleado.setCelular(txtCelular.getText().trim());
+
+            // Crear o actualizar Cargo
+            Cargo cargo = empleado.getCargo();
+            if (cargo == null) cargo = new Cargo();
+            cargo.setNombreCargo(txtNombreCargo.getText().trim());
+            cargo.setCentroTrabajo(txtCentroTrabajo.getText().trim());
+            empleado.setCargo(cargo);
 
             if ("AGREGAR".equals(operacion)) {
                 control.getFachada().agrega(empleado);
@@ -186,7 +192,7 @@ public class DlgEmpleado extends JDialog {
                 JOptionPane.showMessageDialog(this, "Empleado actualizado correctamente", "Éxito", JOptionPane.INFORMATION_MESSAGE);
             }
 
-            respuesta.append(UtileriasGUI.AGREGAR); // o ACTUALIZAR
+            respuesta.append(UtileriasGUI.AGREGAR);
             dispose();
 
         } catch (FachadaException ex) {

@@ -7,12 +7,13 @@ import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import objetosServicio.Fecha;
 import objetosNegocio.Empleado;
+import objetosNegocio.Cargo;
 import excepciones.PersistenciaException;
 
 public class Empleados extends AccesoAleatorio {
 
     public Empleados(String nomArchivo) {
-        super(nomArchivo, 365); // Tamaño ajustado sin CI
+        super(nomArchivo, 395); // Tamaño ajustado con objeto Cargo
     }
 
     private Empleado leeEmpleado() throws IOException {
@@ -25,14 +26,20 @@ public class Empleados extends AccesoAleatorio {
         empleado.setEstadoCivil(leeString(20));
         empleado.setDireccion(leeString(60));
         empleado.setCorreo(leeString(40));
-        empleado.setCargo(leeString(20));
-        empleado.setCentroDeTrabajo(leeString(40));
+
+        // Cargo (objeto)
+        Cargo cargo = new Cargo();
+        cargo.setNombreCargo(leeString(30));
+        cargo.setCentroTrabajo(leeString(40));
+        empleado.setCargo(cargo);
+
         empleado.setFechaIngreso(leeFecha());
         empleado.setFechaBaja(leeFecha());
         empleado.setUsuario(leeString(20));
         empleado.setCedula(leeString(15));
         empleado.setHorario(leeString(20));
         empleado.setCelular(leeString(15));
+
         return empleado;
     }
 
@@ -45,8 +52,12 @@ public class Empleados extends AccesoAleatorio {
         escribeString(empleado.getEstadoCivil(), 20);
         escribeString(empleado.getDireccion(), 60);
         escribeString(empleado.getCorreo(), 40);
-        escribeString(empleado.getCargo(), 20);
-        escribeString(empleado.getCentroDeTrabajo(), 40);
+
+        // Cargo (objeto)
+        Cargo cargo = empleado.getCargo();
+        escribeString(cargo != null ? cargo.getNombreCargo() : "", 30);
+        escribeString(cargo != null ? cargo.getCentroTrabajo() : "", 40);
+
         escribeFecha(empleado.getFechaIngreso());
         escribeFecha(empleado.getFechaBaja());
         escribeString(empleado.getUsuario(), 20);
@@ -54,7 +65,6 @@ public class Empleados extends AccesoAleatorio {
         escribeString(empleado.getHorario(), 20);
         escribeString(empleado.getCelular(), 15);
     }
-
 
     public Empleado obten(Empleado empleado) throws PersistenciaException {
         Empleado empleadoLeido;
@@ -166,7 +176,7 @@ public class Empleados extends AccesoAleatorio {
         try {
             archivo = new RandomAccessFile(nomArchivo, "r");
         } catch (FileNotFoundException fnfe) {
-            throw new PersistenciaException("Archivo inexistente");
+            return lista;
         }
         try {
             while (true) {

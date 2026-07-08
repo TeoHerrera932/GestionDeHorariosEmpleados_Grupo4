@@ -4,28 +4,30 @@ import java.util.ArrayList;
 import excepciones.FachadaException;
 import excepciones.PersistenciaException;
 import interfaces.IFachada;
+import objetosNegocio.Asistencia;
+import objetosNegocio.Cargo;
 import objetosNegocio.Empleado;
 import objetosNegocio.Usuario;
-import objetosNegocio.Asistencia;
 import persistencia.Asistencias;
+import persistencia.Cargos;
 import persistencia.Empleados;
 import persistencia.Usuarios;
 
-
 public class FachadaArchivos implements IFachada {
 
-    private Asistencias catalogoAsistencias;
     private Empleados catalogoEmpleados;
     private Usuarios catalogoUsuarios;
+    private Asistencias catalogoAsistencias;
+    private Cargos catalogoCargos;
 
     public FachadaArchivos() {
         catalogoEmpleados = new Empleados("empleados.dat");
         catalogoUsuarios = new Usuarios("usuarios.dat");
         catalogoAsistencias = new Asistencias("asistencias.dat");
+        catalogoCargos = new Cargos("cargos.dat");
     }
 
     // ====================== EMPLEADOS ======================
-
     @Override
     public Empleado obten(Empleado empleado) throws FachadaException {
         try {
@@ -38,13 +40,11 @@ public class FachadaArchivos implements IFachada {
     @Override
     public void agrega(Empleado empleado) throws FachadaException {
         try {
-            Empleado empleadoBuscado = catalogoEmpleados.obten(empleado);
-            if (empleadoBuscado != null) {
+            Empleado existe = catalogoEmpleados.obten(empleado);
+            if (existe != null) {
                 throw new FachadaException("Empleado repetido");
             }
-        } catch (PersistenciaException pe) {
-            // Archivo no existe aún
-        }
+        } catch (PersistenciaException ignored) {}
         try {
             catalogoEmpleados.agrega(empleado);
         } catch (PersistenciaException pe) {
@@ -80,7 +80,6 @@ public class FachadaArchivos implements IFachada {
     }
 
     // ====================== USUARIOS ======================
-
     @Override
     public Usuario obten(Usuario usuario) throws FachadaException {
         try {
@@ -93,13 +92,11 @@ public class FachadaArchivos implements IFachada {
     @Override
     public void agrega(Usuario usuario) throws FachadaException {
         try {
-            Usuario usuarioBuscado = catalogoUsuarios.obten(usuario);
-            if (usuarioBuscado != null) {
+            Usuario existe = catalogoUsuarios.obten(usuario);
+            if (existe != null) {
                 throw new FachadaException("Usuario repetido");
             }
-        } catch (PersistenciaException pe) {
-            // Archivo no existe aún
-        }
+        } catch (PersistenciaException ignored) {}
         try {
             catalogoUsuarios.agrega(usuario);
         } catch (PersistenciaException pe) {
@@ -142,8 +139,9 @@ public class FachadaArchivos implements IFachada {
             throw new FachadaException("No se puede obtener el usuario por nombre", pe);
         }
     }
-    // ====================== ASISTENCIAS ======================
 
+    // ====================== ASISTENCIAS ======================
+    @Override
     public void registraAsistencia(Asistencia asistencia) throws FachadaException {
         try {
             catalogoAsistencias.agrega(asistencia);
@@ -152,11 +150,37 @@ public class FachadaArchivos implements IFachada {
         }
     }
 
+    @Override
     public ArrayList consultaAsistenciasPorEmpleado(String codigoEmpleado) throws FachadaException {
         try {
             return new ArrayList(catalogoAsistencias.listaPorEmpleado(codigoEmpleado));
         } catch (PersistenciaException pe) {
-            throw new FachadaException("No se puede obtener las asistencias", pe);
+            throw new FachadaException("No se puede obtener las asistencias del empleado", pe);
+        }
+    }
+
+    // ====================== CARGOS ======================
+    @Override
+    public void agregaCargo(Cargo cargo) throws FachadaException {
+        try {
+            Cargo existe = catalogoCargos.obten(cargo);
+            if (existe != null) {
+                throw new FachadaException("Ya existe un cargo con ese código");
+            }
+        } catch (PersistenciaException ignored) {}
+        try {
+            catalogoCargos.agrega(cargo);
+        } catch (PersistenciaException pe) {
+            throw new FachadaException("No se puede agregar el cargo", pe);
+        }
+    }
+
+    @Override
+    public ArrayList consultaCargos() throws FachadaException {
+        try {
+            return new ArrayList(catalogoCargos.lista());
+        } catch (PersistenciaException pe) {
+            throw new FachadaException("No se puede obtener la lista de cargos", pe);
         }
     }
 }
