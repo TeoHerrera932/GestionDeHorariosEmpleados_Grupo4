@@ -5,25 +5,33 @@ import excepciones.FachadaException;
 import excepciones.PersistenciaException;
 import interfaces.IFachada;
 import objetosNegocio.Asistencia;
+import objetosNegocio.Ausencia;
 import objetosNegocio.Cargo;
 import objetosNegocio.Empleado;
 import objetosNegocio.Usuario;
+import objetosNegocio.Vacacion;
 import persistencia.Asistencias;
+import persistencia.Ausencias;
 import persistencia.Cargos;
 import persistencia.Empleados;
 import persistencia.Usuarios;
+import persistencia.Vacaciones;
 
 public class FachadaArchivos implements IFachada {
 
     private Empleados catalogoEmpleados;
     private Usuarios catalogoUsuarios;
     private Asistencias catalogoAsistencias;
+    private Ausencias catalogoAusencias;
+    private Vacaciones catalogoVacaciones;
     private Cargos catalogoCargos;
 
     public FachadaArchivos() {
         catalogoEmpleados = new Empleados("empleados.dat");
         catalogoUsuarios = new Usuarios("usuarios.dat");
         catalogoAsistencias = new Asistencias("asistencias.dat");
+        catalogoAusencias = new Ausencias("ausencias.dat");
+        catalogoVacaciones = new Vacaciones("vacaciones.dat");
         catalogoCargos = new Cargos("cargos.dat");
     }
 
@@ -155,7 +163,45 @@ public class FachadaArchivos implements IFachada {
         try {
             return new ArrayList(catalogoAsistencias.listaPorEmpleado(codigoEmpleado));
         } catch (PersistenciaException pe) {
-            throw new FachadaException("No se puede obtener las asistencias del empleado", pe);
+            throw new FachadaException("No se puede obtener las asistencias", pe);
+        }
+    }
+
+    // ====================== AUSENCIAS ======================
+    @Override
+    public void registraAusencia(Ausencia ausencia) throws FachadaException {
+        try {
+            catalogoAusencias.agrega(ausencia);
+        } catch (PersistenciaException pe) {
+            throw new FachadaException("No se puede registrar la ausencia", pe);
+        }
+    }
+
+    @Override
+    public ArrayList consultaAusenciasPorEmpleado(String codigoEmpleado) throws FachadaException {
+        try {
+            return new ArrayList(catalogoAusencias.listaPorEmpleado(codigoEmpleado));
+        } catch (PersistenciaException pe) {
+            throw new FachadaException("No se puede obtener las ausencias", pe);
+        }
+    }
+
+    // ====================== VACACIONES ======================
+    @Override
+    public void registraVacacion(Vacacion vacacion) throws FachadaException {
+        try {
+            catalogoVacaciones.agrega(vacacion);
+        } catch (PersistenciaException pe) {
+            throw new FachadaException("No se puede registrar la vacación", pe);
+        }
+    }
+
+    @Override
+    public ArrayList consultaVacacionesPorEmpleado(String codigoEmpleado) throws FachadaException {
+        try {
+            return new ArrayList(catalogoVacaciones.listaPorEmpleado(codigoEmpleado));
+        } catch (PersistenciaException pe) {
+            throw new FachadaException("No se puede obtener las vacaciones", pe);
         }
     }
 
