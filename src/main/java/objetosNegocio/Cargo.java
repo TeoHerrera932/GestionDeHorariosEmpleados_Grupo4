@@ -32,6 +32,9 @@ public class Cargo {
 
     @Override
     public String toString() {
-        return codigoCargo + " - " + nombreCargo + " (" + centroTrabajo + ")";
+        String cod = (codigoCargo != null) ? codigoCargo : "";
+        String nom = (nombreCargo != null) ? nombreCargo : "Sin nombre";
+        String centro = (centroTrabajo != null) ? centroTrabajo : "";
+        return cod + " - " + nom + (centro.isEmpty() ? "" : " (" + centro + ")");
     }
 }

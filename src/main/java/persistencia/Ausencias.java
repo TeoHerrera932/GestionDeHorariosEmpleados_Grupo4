@@ -32,44 +32,50 @@ public class Ausencias extends AccesoAleatorio {
     }
 
     public void agrega(Ausencia ausencia) throws PersistenciaException {
-        try {
-            archivo = new RandomAccessFile(nomArchivo, "rw");
-            archivo.seek(archivo.length());
+        try (RandomAccessFile raf = new RandomAccessFile(nomArchivo, "rw")) {
+            archivo = raf;
+            raf.seek(raf.length());
             escribeAusencia(ausencia);
-        } catch (FileNotFoundException fnfe) {
-            throw new PersistenciaException("Archivo de ausencias inexistente");
-        } catch (IOException ioe) {
-            throw new PersistenciaException("Error al registrar ausencia");
-        } finally {
-            try {
-                if (archivo != null) archivo.close();
-            } catch (IOException ignored) {}
+        } catch (FileNotFoundException e) {
+            throw new PersistenciaException("Archivo de ausencias inexistente", e);
+        } catch (IOException e) {
+            throw new PersistenciaException("Error al registrar ausencia", e);
         }
     }
 
-    public ArrayList listaPorEmpleado(String codigoEmpleado) throws PersistenciaException {
-        ArrayList lista = new ArrayList();
-        Ausencia a;
-        try {
-            archivo = new RandomAccessFile(nomArchivo, "r");
-        } catch (FileNotFoundException fnfe) {
-            return lista;
-        }
-        try {
+    public ArrayList<Ausencia> listaPorEmpleado(String codigoEmpleado) throws PersistenciaException {
+        ArrayList<Ausencia> lista = new ArrayList<>();
+        try (RandomAccessFile raf = new RandomAccessFile(nomArchivo, "r")) {
+            archivo = raf;
             while (true) {
-                a = leeAusencia();
+                Ausencia a = leeAusencia();
                 if (a.getCodigoEmpleado().equals(codigoEmpleado)) {
                     lista.add(a);
                 }
             }
-        } catch (EOFException eofe) {
+        } catch (FileNotFoundException e) {
             return lista;
-        } catch (IOException ioe) {
-            throw new PersistenciaException("Error al leer ausencias");
-        } finally {
-            try {
-                if (archivo != null) archivo.close();
-            } catch (IOException ignored) {}
+        } catch (EOFException e) {
+            return lista;
+        } catch (IOException e) {
+            throw new PersistenciaException("Error al leer ausencias por empleado", e);
+        }
+    }
+
+    // ================ NUEVO MÉTODO lista() ================
+    public ArrayList<Ausencia> lista() throws PersistenciaException {
+        ArrayList<Ausencia> lista = new ArrayList<>();
+        try (RandomAccessFile raf = new RandomAccessFile(nomArchivo, "r")) {
+            archivo = raf;
+            while (true) {
+                lista.add(leeAusencia());
+            }
+        } catch (FileNotFoundException e) {
+            return lista;
+        } catch (EOFException e) {
+            return lista;
+        } catch (IOException e) {
+            throw new PersistenciaException("Error al listar ausencias", e);
         }
     }
 }

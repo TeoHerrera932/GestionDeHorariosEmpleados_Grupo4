@@ -12,7 +12,7 @@ import excepciones.PersistenciaException;
 public class Vacaciones extends AccesoAleatorio {
 
     public Vacaciones(String nomArchivo) {
-        super(nomArchivo, 80); // Ajusta según tus necesidades
+        super(nomArchivo, 80);
     }
 
     private Vacacion leeVacacion() throws IOException {
@@ -34,44 +34,50 @@ public class Vacaciones extends AccesoAleatorio {
     }
 
     public void agrega(Vacacion vacacion) throws PersistenciaException {
-        try {
-            archivo = new RandomAccessFile(nomArchivo, "rw");
-            archivo.seek(archivo.length());
+        try (RandomAccessFile raf = new RandomAccessFile(nomArchivo, "rw")) {
+            archivo = raf;
+            raf.seek(raf.length());
             escribeVacacion(vacacion);
-        } catch (FileNotFoundException fnfe) {
-            throw new PersistenciaException("Archivo de vacaciones inexistente");
-        } catch (IOException ioe) {
-            throw new PersistenciaException("Error al registrar vacaciones");
-        } finally {
-            try {
-                if (archivo != null) archivo.close();
-            } catch (IOException ignored) {}
+        } catch (FileNotFoundException e) {
+            throw new PersistenciaException("Archivo de vacaciones inexistente", e);
+        } catch (IOException e) {
+            throw new PersistenciaException("Error al registrar vacaciones", e);
         }
     }
 
-    public ArrayList listaPorEmpleado(String codigoEmpleado) throws PersistenciaException {
-        ArrayList lista = new ArrayList();
-        Vacacion v;
-        try {
-            archivo = new RandomAccessFile(nomArchivo, "r");
-        } catch (FileNotFoundException fnfe) {
-            return lista;
-        }
-        try {
+    public ArrayList<Vacacion> listaPorEmpleado(String codigoEmpleado) throws PersistenciaException {
+        ArrayList<Vacacion> lista = new ArrayList<>();
+        try (RandomAccessFile raf = new RandomAccessFile(nomArchivo, "r")) {
+            archivo = raf;
             while (true) {
-                v = leeVacacion();
+                Vacacion v = leeVacacion();
                 if (v.getCodigoEmpleado().equals(codigoEmpleado)) {
                     lista.add(v);
                 }
             }
-        } catch (EOFException eofe) {
+        } catch (FileNotFoundException e) {
             return lista;
-        } catch (IOException ioe) {
-            throw new PersistenciaException("Error al leer vacaciones");
-        } finally {
-            try {
-                if (archivo != null) archivo.close();
-            } catch (IOException ignored) {}
+        } catch (EOFException e) {
+            return lista;
+        } catch (IOException e) {
+            throw new PersistenciaException("Error al leer vacaciones por empleado", e);
+        }
+    }
+
+    // ================ NUEVO MÉTODO lista() ================
+    public ArrayList<Vacacion> lista() throws PersistenciaException {
+        ArrayList<Vacacion> lista = new ArrayList<>();
+        try (RandomAccessFile raf = new RandomAccessFile(nomArchivo, "r")) {
+            archivo = raf;
+            while (true) {
+                lista.add(leeVacacion());
+            }
+        } catch (FileNotFoundException e) {
+            return lista;
+        } catch (EOFException e) {
+            return lista;
+        } catch (IOException e) {
+            throw new PersistenciaException("Error al listar vacaciones", e);
         }
     }
 }

@@ -4,18 +4,9 @@ import java.util.ArrayList;
 import excepciones.FachadaException;
 import excepciones.PersistenciaException;
 import interfaces.IFachada;
-import objetosNegocio.Asistencia;
-import objetosNegocio.Ausencia;
-import objetosNegocio.Cargo;
-import objetosNegocio.Empleado;
-import objetosNegocio.Usuario;
-import objetosNegocio.Vacacion;
-import persistencia.Asistencias;
-import persistencia.Ausencias;
-import persistencia.Cargos;
-import persistencia.Empleados;
-import persistencia.Usuarios;
-import persistencia.Vacaciones;
+import objetosNegocio.*;
+import objetosServicio.Fecha;
+import persistencia.*;
 
 public class FachadaArchivos implements IFachada {
 
@@ -25,6 +16,8 @@ public class FachadaArchivos implements IFachada {
     private Ausencias catalogoAusencias;
     private Vacaciones catalogoVacaciones;
     private Cargos catalogoCargos;
+    private Horarios catalogoHorarios;
+    private Centros catalogoCentros;
 
     public FachadaArchivos() {
         catalogoEmpleados = new Empleados("empleados.dat");
@@ -33,6 +26,8 @@ public class FachadaArchivos implements IFachada {
         catalogoAusencias = new Ausencias("ausencias.dat");
         catalogoVacaciones = new Vacaciones("vacaciones.dat");
         catalogoCargos = new Cargos("cargos.dat");
+        catalogoHorarios = new Horarios("horarios.dat");
+        catalogoCentros = new Centros("centros.dat");
     }
 
     // ====================== EMPLEADOS ======================
@@ -79,9 +74,9 @@ public class FachadaArchivos implements IFachada {
     }
 
     @Override
-    public ArrayList consultaEmpleados() throws FachadaException {
+    public ArrayList<Empleado> consultaEmpleados() throws FachadaException {
         try {
-            return new ArrayList(catalogoEmpleados.lista());
+            return catalogoEmpleados.lista();
         } catch (PersistenciaException pe) {
             throw new FachadaException("No se puede obtener la lista de empleados", pe);
         }
@@ -131,9 +126,9 @@ public class FachadaArchivos implements IFachada {
     }
 
     @Override
-    public ArrayList consultaUsuarios() throws FachadaException {
+    public ArrayList<Usuario> consultaUsuarios() throws FachadaException {
         try {
-            return new ArrayList(catalogoUsuarios.lista());
+            return catalogoUsuarios.lista();
         } catch (PersistenciaException pe) {
             throw new FachadaException("No se puede obtener la lista de usuarios", pe);
         }
@@ -150,58 +145,119 @@ public class FachadaArchivos implements IFachada {
 
     // ====================== ASISTENCIAS ======================
     @Override
-    public void registraAsistencia(Asistencia asistencia) throws FachadaException {
+    public void registraAsistencia(Asistencia a) throws FachadaException {
         try {
-            catalogoAsistencias.agrega(asistencia);
-        } catch (PersistenciaException pe) {
-            throw new FachadaException("No se puede registrar la asistencia", pe);
+            catalogoAsistencias.agrega(a);
+        } catch (PersistenciaException e) {
+            throw new FachadaException("Error registro asistencia", e);
         }
     }
 
     @Override
-    public ArrayList consultaAsistenciasPorEmpleado(String codigoEmpleado) throws FachadaException {
+    public ArrayList<Asistencia> consultaAsistenciasPorEmpleado(String codigo) throws FachadaException {
         try {
-            return new ArrayList(catalogoAsistencias.listaPorEmpleado(codigoEmpleado));
-        } catch (PersistenciaException pe) {
-            throw new FachadaException("No se puede obtener las asistencias", pe);
+            return catalogoAsistencias.listaPorEmpleado(codigo);
+        } catch (PersistenciaException e) {
+            throw new FachadaException("Error consulta asistencias por empleado", e);
+        }
+    }
+
+    @Override
+    public ArrayList<Asistencia> consultaAsistencias() throws FachadaException {
+        try {
+            return catalogoAsistencias.lista();
+        } catch (PersistenciaException e) {
+            throw new FachadaException("Error listar asistencias", e);
+        }
+    }
+
+    @Override
+    public ArrayList<Asistencia> consultaAsistenciasPorFecha(Fecha fecha) throws FachadaException {
+        try {
+            // Usamos stream para filtrar, pero podríamos hacer un método en Asistencias
+            return catalogoAsistencias.lista().stream()
+                    .filter(a -> a.getFecha().equals(fecha))
+                    .collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
+        } catch (PersistenciaException e) {
+            throw new FachadaException("Error filtrar asistencias por fecha", e);
         }
     }
 
     // ====================== AUSENCIAS ======================
     @Override
-    public void registraAusencia(Ausencia ausencia) throws FachadaException {
+    public void registraAusencia(Ausencia a) throws FachadaException {
         try {
-            catalogoAusencias.agrega(ausencia);
-        } catch (PersistenciaException pe) {
-            throw new FachadaException("No se puede registrar la ausencia", pe);
+            catalogoAusencias.agrega(a);
+        } catch (PersistenciaException e) {
+            throw new FachadaException("Error registro ausencia", e);
         }
     }
 
     @Override
-    public ArrayList consultaAusenciasPorEmpleado(String codigoEmpleado) throws FachadaException {
+    public ArrayList<Ausencia> consultaAusenciasPorEmpleado(String codigo) throws FachadaException {
         try {
-            return new ArrayList(catalogoAusencias.listaPorEmpleado(codigoEmpleado));
-        } catch (PersistenciaException pe) {
-            throw new FachadaException("No se puede obtener las ausencias", pe);
+            return catalogoAusencias.listaPorEmpleado(codigo);
+        } catch (PersistenciaException e) {
+            throw new FachadaException("Error consulta ausencias por empleado", e);
+        }
+    }
+
+    @Override
+    public ArrayList<Ausencia> consultaAusencias() throws FachadaException {
+        try {
+            return catalogoAusencias.lista();
+        } catch (PersistenciaException e) {
+            throw new FachadaException("Error listar ausencias", e);
+        }
+    }
+
+    @Override
+    public ArrayList<Ausencia> consultaAusenciasPorMes(int mes, int anio) throws FachadaException {
+        try {
+            return catalogoAusencias.lista().stream()
+                    .filter(a -> a.getFecha().getMes() == mes && a.getFecha().getAnio() == anio)
+                    .collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
+        } catch (PersistenciaException e) {
+            throw new FachadaException("Error filtrar ausencias por mes", e);
         }
     }
 
     // ====================== VACACIONES ======================
     @Override
-    public void registraVacacion(Vacacion vacacion) throws FachadaException {
+    public void registraVacacion(Vacacion v) throws FachadaException {
         try {
-            catalogoVacaciones.agrega(vacacion);
-        } catch (PersistenciaException pe) {
-            throw new FachadaException("No se puede registrar la vacación", pe);
+            catalogoVacaciones.agrega(v);
+        } catch (PersistenciaException e) {
+            throw new FachadaException("Error registro vacación", e);
         }
     }
 
     @Override
-    public ArrayList consultaVacacionesPorEmpleado(String codigoEmpleado) throws FachadaException {
+    public ArrayList<Vacacion> consultaVacacionesPorEmpleado(String codigo) throws FachadaException {
         try {
-            return new ArrayList(catalogoVacaciones.listaPorEmpleado(codigoEmpleado));
-        } catch (PersistenciaException pe) {
-            throw new FachadaException("No se puede obtener las vacaciones", pe);
+            return catalogoVacaciones.listaPorEmpleado(codigo);
+        } catch (PersistenciaException e) {
+            throw new FachadaException("Error consulta vacaciones por empleado", e);
+        }
+    }
+
+    @Override
+    public ArrayList<Vacacion> consultaVacaciones() throws FachadaException {
+        try {
+            return catalogoVacaciones.lista();
+        } catch (PersistenciaException e) {
+            throw new FachadaException("Error listar vacaciones", e);
+        }
+    }
+
+    @Override
+    public ArrayList<Vacacion> consultaVacacionesPorMes(int mes, int anio) throws FachadaException {
+        try {
+            return catalogoVacaciones.lista().stream()
+                    .filter(v -> v.getFechaInicio().getMes() == mes && v.getFechaInicio().getAnio() == anio)
+                    .collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
+        } catch (PersistenciaException e) {
+            throw new FachadaException("Error filtrar vacaciones por mes", e);
         }
     }
 
@@ -222,11 +278,91 @@ public class FachadaArchivos implements IFachada {
     }
 
     @Override
-    public ArrayList consultaCargos() throws FachadaException {
+    public ArrayList<Cargo> consultaCargos() throws FachadaException {
         try {
-            return new ArrayList(catalogoCargos.lista());
+            return catalogoCargos.lista();
         } catch (PersistenciaException pe) {
             throw new FachadaException("No se puede obtener la lista de cargos", pe);
+        }
+    }
+    @Override
+    public void eliminaCargo(Cargo cargo) throws FachadaException {
+        try {
+            catalogoCargos.elimina(cargo);
+        } catch (PersistenciaException pe) {
+            throw new FachadaException("No se puede eliminar el cargo", pe);
+        }
+    }
+
+    // ====================== HORARIOS ======================
+    @Override
+    public void agregaHorario(Horario h) throws FachadaException {
+        try {
+            catalogoHorarios.agrega(h);
+        } catch (PersistenciaException e) {
+            throw new FachadaException("Error agregar horario", e);
+        }
+    }
+
+    @Override
+    public ArrayList<Horario> consultaHorarios() throws FachadaException {
+        try {
+            return catalogoHorarios.lista();
+        } catch (PersistenciaException e) {
+            throw new FachadaException("Error listar horarios", e);
+        }
+    }
+
+    @Override
+    public Horario obtenHorario(Horario h) throws FachadaException {
+        try {
+            return catalogoHorarios.obten(h);
+        } catch (PersistenciaException e) {
+            throw new FachadaException("Error obtener horario", e);
+        }
+    }
+    @Override
+    public void eliminaHorario(Horario horario) throws FachadaException {
+        try {
+            catalogoHorarios.elimina(horario);
+        } catch (PersistenciaException pe) {
+            throw new FachadaException("No se puede eliminar el horario", pe);
+        }
+    }
+
+    // ====================== CENTROS ======================
+    @Override
+    public void agregaCentro(Centro c) throws FachadaException {
+        try {
+            catalogoCentros.agrega(c);
+        } catch (PersistenciaException e) {
+            throw new FachadaException("Error agregar centro", e);
+        }
+    }
+
+    @Override
+    public ArrayList<Centro> consultaCentros() throws FachadaException {
+        try {
+            return catalogoCentros.lista();
+        } catch (PersistenciaException e) {
+            throw new FachadaException("Error listar centros", e);
+        }
+    }
+
+    @Override
+    public Centro obtenCentro(Centro c) throws FachadaException {
+        try {
+            return catalogoCentros.obten(c);
+        } catch (PersistenciaException e) {
+            throw new FachadaException("Error obtener centro", e);
+        }
+    }
+    @Override
+    public void eliminaCentro(Centro centro) throws FachadaException {
+        try {
+            catalogoCentros.elimina(centro);
+        } catch (PersistenciaException pe) {
+            throw new FachadaException("No se puede eliminar el centro", pe);
         }
     }
 }

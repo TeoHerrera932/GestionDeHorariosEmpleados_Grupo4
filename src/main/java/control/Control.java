@@ -13,20 +13,24 @@ import interfazUsuario.DlgEmpleado;
 
 public class Control {
 
-    //Acceso a los objetos del negocio
-    IFachada fachada;
-    Conversiones conversiones;
+    // ================== ATRIBUTOS ==================
+    private IFachada fachada;
+    private Conversiones conversiones;
 
-    //Vectores con los nombres de las columnas de las tablas
-    ArrayList nombresColumnasTablaEmpleados = new ArrayList();
-    ArrayList nombresColumnasTablaUsuarios = new ArrayList();
+    // Vectores con los nombres de las columnas de las tablas
+    private ArrayList<String> nombresColumnasTablaEmpleados;
+    private ArrayList<String> nombresColumnasTablaUsuarios;
 
-    public Control(){
-        //Crea un objeto tipo fachada
+    // ================== CONSTRUCTOR ==================
+    public Control() {
         fachada = new FachadaArchivos();
         conversiones = new Conversiones();
 
-        //Llena el arraylist con los nombres de las columnas de la tabla de Empleados
+        // Inicializar listas de nombres de columnas
+        nombresColumnasTablaEmpleados = new ArrayList<>();
+        nombresColumnasTablaUsuarios = new ArrayList<>();
+
+        // Llenar columnas de Empleados
         nombresColumnasTablaEmpleados.add("Código");
         nombresColumnasTablaEmpleados.add("Nombres");
         nombresColumnasTablaEmpleados.add("Apellidos");
@@ -44,16 +48,14 @@ public class Control {
         nombresColumnasTablaEmpleados.add("Horario");
         nombresColumnasTablaEmpleados.add("Celular");
 
-        //Llena el arraylist con los nombres de las columnas de la tabla de Usuarios
+        // Llenar columnas de Usuarios
         nombresColumnasTablaUsuarios.add("Cargo");
         nombresColumnasTablaUsuarios.add("Usuario");
         nombresColumnasTablaUsuarios.add("Contraseña");
     }
 
-    // ====================== MÉTODOS PARA EMPLEADOS ======================
-
-    public void agregaEmpleado(JFrame frame){
-        
+    // ================== MÉTODOS PARA EMPLEADOS ==================
+    public void agregaEmpleado(JFrame frame) {
         StringBuffer respuesta = new StringBuffer("");
         String codigo = JOptionPane.showInputDialog(frame, "Código de Empleado:",
                 "Agregar Empleado", JOptionPane.QUESTION_MESSAGE);
@@ -83,7 +85,7 @@ public class Control {
         }
     }
 
-    public void actualizaEmpleado(JFrame frame){
+    public void actualizaEmpleado(JFrame frame) {
         StringBuffer respuesta = new StringBuffer("");
         String codigo = JOptionPane.showInputDialog(frame, "Código del empleado:",
                 "Actualizar Empleado", JOptionPane.QUESTION_MESSAGE);
@@ -115,7 +117,7 @@ public class Control {
         }
     }
 
-    public void eliminaEmpleado(JFrame frame){
+    public void eliminaEmpleado(JFrame frame) {
         String codigo = JOptionPane.showInputDialog(frame, "Código del empleado",
                 "Eliminar Empleado", JOptionPane.QUESTION_MESSAGE);
         if (codigo == null) return;
@@ -134,9 +136,9 @@ public class Control {
             return;
         }
 
-        int confirm = JOptionPane.showConfirmDialog(frame, 
-            "¿Está seguro de eliminar al empleado " + empleado.getNombres() + " " + empleado.getApellidos() + "?",
-            "Confirmar Eliminación", JOptionPane.YES_NO_OPTION);
+        int confirm = JOptionPane.showConfirmDialog(frame,
+                "¿Está seguro de eliminar al empleado " + empleado.getNombres() + " " + empleado.getApellidos() + "?",
+                "Confirmar Eliminación", JOptionPane.YES_NO_OPTION);
 
         if (confirm == JOptionPane.YES_OPTION) {
             try {
@@ -148,64 +150,142 @@ public class Control {
         }
     }
 
-    
-
-    // ====================== MÉTODOS PARA USUARIOS ======================
-
-    public void agregaUsuario(JFrame frame){
-        // Similar a agregaEmpleado... (puedes implementarlo después)
-        JOptionPane.showMessageDialog(frame, "Funcionalidad de agregar usuario en desarrollo");
-    }
-
+    // ================== MÉTODOS PARA USUARIOS ==================
     public Usuario login(String nombreUsuario, String contrasena) {
         try {
-            Usuario usuario = fachada.obtenPorUsuario(nombreUsuario);
-            if (usuario != null && usuario.getContrasena().equals(contrasena)) {
-                return usuario;
-            }
-        } catch (Exception e) {
-            // Manejo silencioso o log
-        }
+            Usuario u = fachada.obtenPorUsuario(nombreUsuario);
+            if (u != null && u.getContrasena().equals(contrasena)) return u;
+        } catch (Exception ignored) {}
         return null;
     }
+
+    // ================== HORARIOS ==================
+    public ArrayList<Horario> consultaHorarios() throws FachadaException {
+        return fachada.consultaHorarios();
+    }
+
+    public void guardaHorario(Horario h) throws FachadaException {
+        fachada.agregaHorario(h);
+    }
+
+    // ================== CENTROS ==================
+    public ArrayList<Centro> consultaCentros() throws FachadaException {
+        return fachada.consultaCentros();
+    }
+
+    public void guardaCentro(Centro c) throws FachadaException {
+        fachada.agregaCentro(c);
+    }
+
+    // ================== ASISTENCIAS ==================
     public void registrarAsistencia(String codigoEmpleado, String horaIngreso, String horaSalida) {
         try {
-            // Crear fecha actual
             java.util.Calendar cal = java.util.Calendar.getInstance();
             Fecha fechaActual = new Fecha(
                     cal.get(java.util.Calendar.DAY_OF_MONTH),
                     cal.get(java.util.Calendar.MONTH) + 1,
                     cal.get(java.util.Calendar.YEAR)
             );
-
             Asistencia asistencia = new Asistencia(codigoEmpleado, fechaActual, horaIngreso);
-
             if (horaSalida != null && !horaSalida.trim().isEmpty()) {
                 asistencia.setHoraSalida(horaSalida);
             }
-
             fachada.registraAsistencia(asistencia);
-
-            JOptionPane.showMessageDialog(null,
-                    "✅ Asistencia registrada correctamente\n\n" +
-                            "Empleado: " + codigoEmpleado + "\n" +
-                            "Fecha: " + fechaActual + "\n" +
-                            "Hora Ingreso: " + horaIngreso +
-                            (horaSalida != null && !horaSalida.isEmpty() ? "\nHora Salida: " + horaSalida : ""),
-                    "Registro Exitoso",
-                    JOptionPane.INFORMATION_MESSAGE);
-
-        } catch (FachadaException ex) {
-            JOptionPane.showMessageDialog(null,
-                    "Error al registrar asistencia:\n" + ex.getMessage(),
-                    "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, " Asistencia registrada correctamente");
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(null,
-                    "Error inesperado: " + ex.getMessage(),
-                    "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
+
+    public ArrayList<Asistencia> consultaAsistenciasPorEmpleado(String codigo) throws FachadaException {
+        return fachada.consultaAsistenciasPorEmpleado(codigo);
+    }
+
+    public ArrayList<Asistencia> consultaTodasAsistencias() throws FachadaException {
+        return fachada.consultaAsistencias();
+    }
+
+    // ================== VACACIONES ==================
+    public void registraVacacion(Vacacion v) throws FachadaException {
+        fachada.registraVacacion(v);
+    }
+
+    public ArrayList<Vacacion> consultaVacacionesPorEmpleado(String codigo) throws FachadaException {
+        return fachada.consultaVacacionesPorEmpleado(codigo);
+    }
+
+    public ArrayList<Vacacion> consultaVacacionesPorMes(int mes, int anio) throws FachadaException {
+        return fachada.consultaVacacionesPorMes(mes, anio);
+    }
+
+    // ================== AUSENCIAS ==================
+    public void registraAusencia(Ausencia a) throws FachadaException {
+        fachada.registraAusencia(a);
+    }
+
+    public ArrayList<Ausencia> consultaAusenciasPorEmpleado(String codigo) throws FachadaException {
+        return fachada.consultaAusenciasPorEmpleado(codigo);
+    }
+
+    public ArrayList<Ausencia> consultaAusenciasPorMes(int mes, int anio) throws FachadaException {
+        return fachada.consultaAusenciasPorMes(mes, anio);
+    }
+
+    // ================== GENERACIÓN DE USUARIO SUGERIDO ==================
+    public String generarUsuarioSugerido(String nombres, String apellidos) throws FachadaException {
+        String base = nombres.substring(0, 2) + apellidos.substring(0, 2);
+        ArrayList<Usuario> usuarios = fachada.consultaUsuarios();
+        int maxNum = usuarios.stream()
+                .map(Usuario::getUsuario)
+                .filter(u -> u.startsWith(base))
+                .map(u -> {
+                    try {
+                        return Integer.parseInt(u.substring(base.length()));
+                    } catch (NumberFormatException e) {
+                        return 0;
+                    }
+                })
+                .max(Integer::compareTo)
+                .orElse(0);
+        return base + (maxNum + 1);
+    }
+
+    // ================== CARGOS ==================
+    public ArrayList<Cargo> consultaCargos() throws FachadaException {
+        return fachada.consultaCargos();
+    }
+
+    // ================== GETTER ==================
     public IFachada getFachada() {
         return fachada;
+    }
+
+    // ================== GETTERS PARA COLUMNAS (opcional) ==================
+    public ArrayList<String> getNombresColumnasTablaEmpleados() {
+        return nombresColumnasTablaEmpleados;
+    }
+
+    public ArrayList<String> getNombresColumnasTablaUsuarios() {
+        return nombresColumnasTablaUsuarios;
+    }
+    public void eliminaCargo(Cargo cargo) throws FachadaException {
+        fachada.eliminaCargo(cargo);
+    }
+
+    public void eliminaCentro(Centro centro) throws FachadaException {
+        fachada.eliminaCentro(centro);
+    }
+
+    public void eliminaHorario(Horario horario) throws FachadaException {
+        fachada.eliminaHorario(horario);
+    }
+    public String obtenerCodigoEmpleadoPorUsuario(String nombreUsuario) throws FachadaException {
+        ArrayList<Empleado> empleados = fachada.consultaEmpleados();
+        for (Empleado e : empleados) {
+            if (e.getUsuario() != null && e.getUsuario().equals(nombreUsuario)) {
+                return e.getCodigoEmpleado();
+            }
+        }
+        return null;
     }
 }

@@ -12,9 +12,10 @@ import excepciones.PersistenciaException;
 public class Asistencias extends AccesoAleatorio {
 
     public Asistencias(String nomArchivo) {
-        super(nomArchivo, 100); // Ajusta si es necesario
+        super(nomArchivo, 100);
     }
 
+    // ================== LECTURA / ESCRITURA ==================
     private Asistencia leeAsistencia() throws IOException {
         Asistencia a = new Asistencia();
         a.setCodigoEmpleado(leeString(10));
@@ -33,71 +34,57 @@ public class Asistencias extends AccesoAleatorio {
         escribeString(a.getEstado(), 15);
     }
 
+    // ================== AGREGAR ==================
     public void agrega(Asistencia asistencia) throws PersistenciaException {
-        try {
-            archivo = new RandomAccessFile(nomArchivo, "rw");
-            archivo.seek(archivo.length());
+        try (RandomAccessFile raf = new RandomAccessFile(nomArchivo, "rw")) {
+            archivo = raf;
+            raf.seek(raf.length());
             escribeAsistencia(asistencia);
-        } catch (FileNotFoundException fnfe) {
-            throw new PersistenciaException("Archivo de asistencias inexistente");
-        } catch (IOException ioe) {
-            throw new PersistenciaException("Error al registrar asistencia");
-        } finally {
-            try {
-                if (archivo != null) archivo.close();
-            } catch (IOException ioe) {
-                throw new PersistenciaException("Error al cerrar archivo");
-            }
+        } catch (FileNotFoundException e) {
+            throw new PersistenciaException("Archivo de asistencias inexistente", e);
+        } catch (IOException e) {
+            throw new PersistenciaException("Error al registrar asistencia", e);
         }
     }
 
-    public ArrayList listaPorEmpleado(String codigoEmpleado) throws PersistenciaException {
-        ArrayList lista = new ArrayList();
-        Asistencia asistencia;
-        try {
-            archivo = new RandomAccessFile(nomArchivo, "r");
-        } catch (FileNotFoundException fnfe) {
-            return lista; // Archivo aún no existe
-        }
-        try {
+    // ================== LISTAR POR EMPLEADO ==================
+    public ArrayList<Asistencia> listaPorEmpleado(String codigoEmpleado) throws PersistenciaException {
+        ArrayList<Asistencia> lista = new ArrayList<>();
+        try (RandomAccessFile raf = new RandomAccessFile(nomArchivo, "r")) {
+            archivo = raf;
             while (true) {
-                asistencia = leeAsistencia();
-                if (asistencia.getCodigoEmpleado().equals(codigoEmpleado)) {
-                    lista.add(asistencia);
+                Asistencia a = leeAsistencia();
+                if (a.getCodigoEmpleado().equals(codigoEmpleado)) {
+                    lista.add(a);
                 }
             }
-        } catch (EOFException eofe) {
+        } catch (FileNotFoundException e) {
+            // Archivo aún no existe → lista vacía
             return lista;
-        } catch (IOException ioe) {
-            throw new PersistenciaException("Error al leer asistencias");
-        } finally {
-            try {
-                if (archivo != null) archivo.close();
-            } catch (IOException ioe) {}
+        } catch (EOFException e) {
+            // Fin del archivo alcanzado
+            return lista;
+        } catch (IOException e) {
+            throw new PersistenciaException("Error al leer asistencias por empleado", e);
         }
     }
 
-    public ArrayList lista() throws PersistenciaException {
-        ArrayList lista = new ArrayList();
-        Asistencia asistencia;
-        try {
-            archivo = new RandomAccessFile(nomArchivo, "r");
-        } catch (FileNotFoundException fnfe) {
-            return lista;
-        }
-        try {
+    // ================== LISTAR TODAS (MODIFICADO) ==================
+    public ArrayList<Asistencia> lista() throws PersistenciaException {
+        ArrayList<Asistencia> lista = new ArrayList<>();
+        try (RandomAccessFile raf = new RandomAccessFile(nomArchivo, "r")) {
+            archivo = raf;
             while (true) {
-                asistencia = leeAsistencia();
-                lista.add(asistencia);
+                lista.add(leeAsistencia());
             }
-        } catch (EOFException eofe) {
+        } catch (FileNotFoundException e) {
+            // Archivo no existe → lista vacía
             return lista;
-        } catch (IOException ioe) {
-            throw new PersistenciaException("Error al leer asistencias");
-        } finally {
-            try {
-                if (archivo != null) archivo.close();
-            } catch (IOException ioe) {}
+        } catch (EOFException e) {
+            // Fin del archivo → retornar lo leído
+            return lista;
+        } catch (IOException e) {
+            throw new PersistenciaException("Error al leer asistencias", e);
         }
     }
 }

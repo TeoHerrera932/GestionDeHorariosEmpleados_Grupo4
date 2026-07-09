@@ -5,14 +5,25 @@
 package interfazUsuario;
 
 import control.Control;
+import excepciones.FachadaException;
+import objetosNegocio.Usuario;
+
 import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 /**
  *
  * @author User
  */
 public class VentanaPrincipalEmpleado extends javax.swing.JFrame {
-    
+    //Variables de Estado
     private Control control;
+    private Usuario usuarioLogueado;
+    private String horaEntradaRegistrada;
+    private String fechaActual;
+    private Timer timer;
+    private String codigoEmpleadoLogueado;
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(VentanaPrincipalEmpleado.class.getName());
 
@@ -20,9 +31,59 @@ public class VentanaPrincipalEmpleado extends javax.swing.JFrame {
      * Creates new form VentanaPrincipalEmpleado
      */
     public VentanaPrincipalEmpleado(Control control) {
+        this(control, null);
+    }
+
+    public VentanaPrincipalEmpleado(Control control, Usuario usuario) {
         this.control = control;
+        this.usuarioLogueado = usuario;
+        
+        // Obtener código de empleado a partir del usuario logueado
+        if (usuarioLogueado != null) {
+            try {
+                codigoEmpleadoLogueado = control.obtenerCodigoEmpleadoPorUsuario(usuarioLogueado.getUsuario());
+                if (codigoEmpleadoLogueado == null) {
+                // Si no se encuentra, preguntar al usuario
+                    codigoEmpleadoLogueado = solicitarCodigoEmpleado();    
+                }
+            } catch (FachadaException ex) {
+                JOptionPane.showMessageDialog(this, 
+                    "Error al obtener código de empleado: " + ex.getMessage(),
+                    "Error", JOptionPane.ERROR_MESSAGE);
+                codigoEmpleadoLogueado = solicitarCodigoEmpleado();
+            }
+            } else {
+            // Si no hay usuario logueado (caso excepcional), pedir código
+            codigoEmpleadoLogueado = solicitarCodigoEmpleado();
+                    }
+        
+        
         initComponents();
         setLocationRelativeTo(null);
+    
+        
+        // Hacer no editables los campos de hora (solo para mostrar)
+        jFormattedTextField1.setEditable(false);
+        jFormattedTextField2.setEditable(false);
+        iniciarReloj(); //Reloj en tiempo real
+    }
+        // ========== SOLICITAR CÓDIGO DE EMPLEADO MANUALMENTE ==========
+    private String solicitarCodigoEmpleado() {
+        String codigo = JOptionPane.showInputDialog(this,
+            "No se encontró un empleado asociado a su usuario.\n" +
+            "Ingrese su código de empleado manualmente:",
+            "Código de Empleado", JOptionPane.QUESTION_MESSAGE);
+        
+        if (codigo != null && !codigo.trim().isEmpty()) {
+            return codigo.trim();
+        } else {
+            // Si cancela o no ingresa, mostrar advertencia y permitir continuar (pero no podrá registrar)
+            JOptionPane.showMessageDialog(this,
+                "No se ha ingresado un código de empleado. Podrá registrarlo después.",
+                "Advertencia", JOptionPane.WARNING_MESSAGE);
+            return null;
+        }
+        
     }
     
     /**
@@ -41,55 +102,84 @@ public class VentanaPrincipalEmpleado extends javax.swing.JFrame {
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         jFormattedTextField2 = new javax.swing.JFormattedTextField();
+        jLabel4 = new javax.swing.JLabel();
+        jLabel5 = new javax.swing.JLabel();
+        jButton3 = new javax.swing.JButton();
+        jLabel6 = new javax.swing.JLabel();
+        jLabel7 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
         jLabel1.setText("REGISTRO DE ASISTENCIA");
 
-        jButton1.setText("Registrar");
+        jButton1.setText("Registrar Entrada");
         jButton1.addActionListener(this::jButton1ActionPerformed);
 
         jButton2.setText("Salir");
+        jButton2.addActionListener(this::jButton2ActionPerformed);
 
         jFormattedTextField1.addActionListener(this::jFormattedTextField1ActionPerformed);
 
-        jLabel2.setText("Hora ingreso");
+        jLabel2.setText("Hora Entrada");
 
         jLabel3.setText("Hora Salida");
 
         jFormattedTextField2.addActionListener(this::jFormattedTextField2ActionPerformed);
+
+        jLabel4.setText("Hora Actual");
+
+        jLabel5.setText("Fecha");
+
+        jButton3.setText("Registrar Salida");
+        jButton3.addActionListener(this::jButton3ActionPerformed);
+
+        jLabel6.setText("--:--:--");
+
+        jLabel7.setText("dd/MM/yyyy");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGap(85, 85, 85)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jLabel1)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(154, 154, 154)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(jButton2)
-                            .addComponent(jButton1)))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(85, 85, 85)
+                            .addComponent(jLabel3)
+                            .addComponent(jLabel2)
+                            .addComponent(jLabel4)
+                            .addComponent(jLabel5))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel1)
-                            .addGroup(layout.createSequentialGroup()
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                    .addComponent(jLabel3)
-                                    .addComponent(jLabel2))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jFormattedTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 111, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jFormattedTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, 111, javax.swing.GroupLayout.PREFERRED_SIZE))))))
-                .addGap(0, 24, Short.MAX_VALUE))
+                            .addComponent(jFormattedTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 111, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jFormattedTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, 111, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel6)
+                            .addComponent(jLabel7))))
+                .addGap(0, 78, Short.MAX_VALUE))
+            .addGroup(layout.createSequentialGroup()
+                .addGap(139, 139, 139)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jButton2)
+                    .addComponent(jButton3)
+                    .addComponent(jButton1))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(44, 44, 44)
+                .addGap(17, 17, 17)
                 .addComponent(jLabel1)
-                .addGap(35, 35, 35)
+                .addGap(11, 11, 11)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel5)
+                    .addComponent(jLabel7))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel4)
+                    .addComponent(jLabel6))
+                .addGap(7, 7, 7)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jFormattedTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel2))
@@ -97,9 +187,11 @@ public class VentanaPrincipalEmpleado extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel3)
                     .addComponent(jFormattedTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 42, Short.MAX_VALUE)
+                .addGap(18, 18, 18)
                 .addComponent(jButton1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jButton3)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jButton2)
                 .addGap(61, 61, 61))
         );
@@ -107,33 +199,41 @@ public class VentanaPrincipalEmpleado extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    // ================== MÉTODO PARA EL RELOJ EN TIEMPO REAL ==================
+    private void iniciarReloj() {
+        // Actualizar fecha actual
+        SimpleDateFormat sdfFecha = new SimpleDateFormat("dd/MM/yyyy");
+        fechaActual = sdfFecha.format(new Date());
+        jLabel7.setText(fechaActual);
+
+        // Crear timer que actualiza la hora cada segundo
+        timer = new Timer(1000, e -> {
+            SimpleDateFormat sdfHora = new SimpleDateFormat("HH:mm:ss");
+            jLabel6.setText(sdfHora.format(new Date()));
+        });
+        timer.start();
+    }
+    // ================== ACCIÓN: REGISTRAR ENTRADA ==================
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        String horaIngreso = jFormattedTextField1.getText().trim();
-    String horaSalida = jFormattedTextField2.getText().trim();
+        if (codigoEmpleadoLogueado == null) {
+            JOptionPane.showMessageDialog(this, 
+                "No se tiene un código de empleado asociado. Contacte al administrador.",
+                "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
 
-    if (horaIngreso.isEmpty()) {
-        JOptionPane.showMessageDialog(this, 
-            "Debe ingresar al menos la hora de ingreso", 
-            "Datos incompletos", JOptionPane.WARNING_MESSAGE);
-        return;
-    }
+        SimpleDateFormat sdfHora = new SimpleDateFormat("HH:mm");
+        String horaActual = sdfHora.format(new Date());
+        jFormattedTextField1.setText(horaActual);
+        horaEntradaRegistrada = horaActual;
 
-    // Aquí debes obtener el código del empleado logueado
-    // Por ahora lo pedimos, luego lo puedes mejorar con sesión
-    String codigoEmpleado = JOptionPane.showInputDialog(this, 
-        "Ingrese su Código de Empleado:", 
-        "Registro de Asistencia", 
-        JOptionPane.QUESTION_MESSAGE);
+        SimpleDateFormat sdfFecha = new SimpleDateFormat("dd/MM/yyyy");
+        fechaActual = sdfFecha.format(new Date());
+        jLabel7.setText(fechaActual);
 
-    if (codigoEmpleado == null || codigoEmpleado.trim().isEmpty()) {
-        return;
-    }
-
-    control.registrarAsistencia(codigoEmpleado.trim(), horaIngreso, horaSalida);
-    
-    // Limpiar campos después de registrar
-    jFormattedTextField1.setText("");
-    jFormattedTextField2.setText("");
+        JOptionPane.showMessageDialog(this,
+            "Entrada registrada a las " + horaActual + "\nFecha: " + fechaActual,
+            "Registro de Entrada", JOptionPane.INFORMATION_MESSAGE);
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jFormattedTextField1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jFormattedTextField1ActionPerformed
@@ -143,6 +243,53 @@ public class VentanaPrincipalEmpleado extends javax.swing.JFrame {
     private void jFormattedTextField2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jFormattedTextField2ActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_jFormattedTextField2ActionPerformed
+
+    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+       if (horaEntradaRegistrada == null) {
+            JOptionPane.showMessageDialog(this,
+                "Primero debe registrar la entrada.",
+                "Error", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        if (codigoEmpleadoLogueado == null) {
+            JOptionPane.showMessageDialog(this,
+                "No se tiene un código de empleado asociado.",
+                "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        int confirm = JOptionPane.showConfirmDialog(this,
+            "¿Seguro que desea registrar la salida?",
+            "Confirmar Salida",
+            JOptionPane.YES_NO_OPTION,
+            JOptionPane.QUESTION_MESSAGE);
+
+        if (confirm == JOptionPane.YES_OPTION) {
+            SimpleDateFormat sdfHora = new SimpleDateFormat("HH:mm");
+            String horaSalida = sdfHora.format(new Date());
+            jFormattedTextField2.setText(horaSalida);
+
+            // Registrar asistencia con el código obtenido automáticamente
+            control.registrarAsistencia(codigoEmpleadoLogueado, horaEntradaRegistrada, horaSalida);
+
+            // Limpiar campos
+            jFormattedTextField1.setText("");
+            jFormattedTextField2.setText("");
+            horaEntradaRegistrada = null;
+
+            JOptionPane.showMessageDialog(this,
+                "Salida registrada correctamente.",
+                "Registro de Salida", JOptionPane.INFORMATION_MESSAGE);
+        }
+    
+    }//GEN-LAST:event_jButton3ActionPerformed
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        // Detener el timer antes de cerrar
+         if (timer != null) timer.stop();
+        dispose();  // Cierra la ventana
+    }//GEN-LAST:event_jButton2ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -169,10 +316,15 @@ public class VentanaPrincipalEmpleado extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
+    private javax.swing.JButton jButton3;
     private javax.swing.JFormattedTextField jFormattedTextField1;
     private javax.swing.JFormattedTextField jFormattedTextField2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
     // End of variables declaration//GEN-END:variables
 }

@@ -39,10 +39,10 @@ public class VentanaPrincipalAdmin extends javax.swing.JFrame {
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         jMenuItem1 = new javax.swing.JMenuItem();
-        jMenuItem2 = new javax.swing.JMenuItem();
         jMenu2 = new javax.swing.JMenu();
         jMenuItem3 = new javax.swing.JMenuItem();
         jMenuItem4 = new javax.swing.JMenuItem();
+        jMenuItem13 = new javax.swing.JMenuItem();
         jMenu3 = new javax.swing.JMenu();
         jMenuItem5 = new javax.swing.JMenuItem();
         jMenuItem6 = new javax.swing.JMenuItem();
@@ -51,6 +51,10 @@ public class VentanaPrincipalAdmin extends javax.swing.JFrame {
         jMenuItem8 = new javax.swing.JMenuItem();
         jMenuItem9 = new javax.swing.JMenuItem();
         jMenuItem10 = new javax.swing.JMenuItem();
+        jMenu5 = new javax.swing.JMenu();
+        jMenuItem11 = new javax.swing.JMenuItem();
+        jMenuItem12 = new javax.swing.JMenuItem();
+        jMenuItem14 = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -59,9 +63,6 @@ public class VentanaPrincipalAdmin extends javax.swing.JFrame {
         jMenuItem1.setText("Editar empleados");
         jMenuItem1.addActionListener(this::jMenuItem1ActionPerformed);
         jMenu1.add(jMenuItem1);
-
-        jMenuItem2.setText("Lista de Empleados");
-        jMenu1.add(jMenuItem2);
 
         jMenuBar1.add(jMenu1);
 
@@ -72,19 +73,27 @@ public class VentanaPrincipalAdmin extends javax.swing.JFrame {
         jMenu2.add(jMenuItem3);
 
         jMenuItem4.setText("Listado por fechas");
+        jMenuItem4.addActionListener(this::jMenuItem4ActionPerformed);
         jMenu2.add(jMenuItem4);
+
+        jMenuItem13.setText("Registrar asistencia");
+        jMenuItem13.addActionListener(this::jMenuItem13ActionPerformed);
+        jMenu2.add(jMenuItem13);
 
         jMenuBar1.add(jMenu2);
 
         jMenu3.setText("Vacaciones");
 
         jMenuItem5.setText("Registrar Vacacion");
+        jMenuItem5.addActionListener(this::jMenuItem5ActionPerformed);
         jMenu3.add(jMenuItem5);
 
         jMenuItem6.setText("Buscar por Empleado");
+        jMenuItem6.addActionListener(this::jMenuItem6ActionPerformed);
         jMenu3.add(jMenuItem6);
 
         jMenuItem7.setText("Buscar por Mes");
+        jMenuItem7.addActionListener(this::jMenuItem7ActionPerformed);
         jMenu3.add(jMenuItem7);
 
         jMenuBar1.add(jMenu3);
@@ -92,15 +101,34 @@ public class VentanaPrincipalAdmin extends javax.swing.JFrame {
         jMenu4.setText("Ausencias");
 
         jMenuItem8.setText("Registrar justificacion");
+        jMenuItem8.addActionListener(this::jMenuItem8ActionPerformed);
         jMenu4.add(jMenuItem8);
 
         jMenuItem9.setText("Buscar por empleado");
+        jMenuItem9.addActionListener(this::jMenuItem9ActionPerformed);
         jMenu4.add(jMenuItem9);
 
         jMenuItem10.setText("Buscar por mes");
+        jMenuItem10.addActionListener(this::jMenuItem10ActionPerformed);
         jMenu4.add(jMenuItem10);
 
         jMenuBar1.add(jMenu4);
+
+        jMenu5.setText("Configuración");
+
+        jMenuItem11.setText("Cargos");
+        jMenuItem11.addActionListener(this::jMenuItem11ActionPerformed);
+        jMenu5.add(jMenuItem11);
+
+        jMenuItem12.setText("Centros");
+        jMenuItem12.addActionListener(this::jMenuItem12ActionPerformed);
+        jMenu5.add(jMenuItem12);
+
+        jMenuItem14.setText("Horarios");
+        jMenuItem14.addActionListener(this::jMenuItem14ActionPerformed);
+        jMenu5.add(jMenuItem14);
+
+        jMenuBar1.add(jMenu5);
 
         setJMenuBar(jMenuBar1);
 
@@ -123,8 +151,52 @@ public class VentanaPrincipalAdmin extends javax.swing.JFrame {
     }//GEN-LAST:event_jMenuItem1ActionPerformed
 
     private void jMenuItem3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem3ActionPerformed
-        // TODO add your handling code here:
+         new DlgBuscarAsistenciasEmpleado(this, control).setVisible(true);
     }//GEN-LAST:event_jMenuItem3ActionPerformed
+
+    private void jMenuItem14ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem14ActionPerformed
+      new DlgConfiguracion(this, control).setVisible(true);
+    }//GEN-LAST:event_jMenuItem14ActionPerformed
+
+    private void jMenuItem4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem4ActionPerformed
+        new DlgListadoAsistenciasFecha(this, control).setVisible(true);
+    }//GEN-LAST:event_jMenuItem4ActionPerformed
+
+    private void jMenuItem13ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem13ActionPerformed
+       new VentanaPrincipalEmpleado(control).setVisible(true);
+    }//GEN-LAST:event_jMenuItem13ActionPerformed
+
+    private void jMenuItem6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem6ActionPerformed
+        new DlgBuscarVacacionesEmpleado(this, control).setVisible(true);
+    }//GEN-LAST:event_jMenuItem6ActionPerformed
+
+    private void jMenuItem7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem7ActionPerformed
+        new DlgBuscarVacacionesMes(this, control).setVisible(true);
+    }//GEN-LAST:event_jMenuItem7ActionPerformed
+
+    private void jMenuItem8ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem8ActionPerformed
+        new DlgJustificarAusencia(this, control).setVisible(true);
+    }//GEN-LAST:event_jMenuItem8ActionPerformed
+
+    private void jMenuItem9ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem9ActionPerformed
+       new DlgBuscarAusenciasEmpleado(this, control).setVisible(true);
+    }//GEN-LAST:event_jMenuItem9ActionPerformed
+
+    private void jMenuItem10ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem10ActionPerformed
+       new DlgBuscarAusenciasMes(this, control).setVisible(true);
+    }//GEN-LAST:event_jMenuItem10ActionPerformed
+
+    private void jMenuItem11ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem11ActionPerformed
+        new DlgConfiguracion(this, control).setVisible(true);
+    }//GEN-LAST:event_jMenuItem11ActionPerformed
+
+    private void jMenuItem12ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem12ActionPerformed
+       new DlgConfiguracion(this, control).setVisible(true);
+    }//GEN-LAST:event_jMenuItem12ActionPerformed
+
+    private void jMenuItem5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem5ActionPerformed
+        new DlgRegistrarVacacion(this, control).setVisible(true);
+    }//GEN-LAST:event_jMenuItem5ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -153,10 +225,14 @@ public class VentanaPrincipalAdmin extends javax.swing.JFrame {
     private javax.swing.JMenu jMenu2;
     private javax.swing.JMenu jMenu3;
     private javax.swing.JMenu jMenu4;
+    private javax.swing.JMenu jMenu5;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JMenuItem jMenuItem10;
-    private javax.swing.JMenuItem jMenuItem2;
+    private javax.swing.JMenuItem jMenuItem11;
+    private javax.swing.JMenuItem jMenuItem12;
+    private javax.swing.JMenuItem jMenuItem13;
+    private javax.swing.JMenuItem jMenuItem14;
     private javax.swing.JMenuItem jMenuItem3;
     private javax.swing.JMenuItem jMenuItem4;
     private javax.swing.JMenuItem jMenuItem5;

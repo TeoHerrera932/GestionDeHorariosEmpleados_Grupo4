@@ -31,67 +31,71 @@ public class Cargos extends AccesoAleatorio {
     }
 
     public void agrega(Cargo cargo) throws PersistenciaException {
-        try {
-            archivo = new RandomAccessFile(nomArchivo, "rw");
-            archivo.seek(archivo.length());
+        try (RandomAccessFile raf = new RandomAccessFile(nomArchivo, "rw")) {
+            archivo = raf;
+            raf.seek(raf.length());
             escribeCargo(cargo);
         } catch (FileNotFoundException fnfe) {
-            throw new PersistenciaException("Archivo de cargos inexistente");
+            throw new PersistenciaException("Archivo de cargos inexistente", fnfe);
         } catch (IOException ioe) {
-            throw new PersistenciaException("Error al guardar cargo");
-        } finally {
-            try {
-                if (archivo != null) archivo.close();
-            } catch (IOException ioe) {}
+            throw new PersistenciaException("Error al guardar cargo", ioe);
         }
     }
 
     public Cargo obten(Cargo cargo) throws PersistenciaException {
-        Cargo cargoLeido;
-        try {
-            archivo = new RandomAccessFile(nomArchivo, "r");
-        } catch (FileNotFoundException fnfe) {
-            throw new PersistenciaException("Archivo inexistente");
-        }
-        try {
+        try (RandomAccessFile raf = new RandomAccessFile(nomArchivo, "r")) {
+            archivo = raf;
             while (true) {
-                cargoLeido = leeCargo();
-                if (cargo.getCodigoCargo().equals(cargoLeido.getCodigoCargo())) {
-                    return cargoLeido;
+                Cargo leido = leeCargo();
+                if (leido.getCodigoCargo().equals(cargo.getCodigoCargo())) {
+                    return leido;
                 }
             }
         } catch (EOFException eofe) {
             return null;
+        } catch (FileNotFoundException fnfe) {
+            return null;
         } catch (IOException ioe) {
-            throw new PersistenciaException("Error al leer cargos");
-        } finally {
-            try {
-                archivo.close();
-            } catch (IOException ioe) {}
+            throw new PersistenciaException("Error al leer cargos", ioe);
         }
     }
 
-    public ArrayList lista() throws PersistenciaException {
-        ArrayList lista = new ArrayList();
-        Cargo cargo;
-        try {
-            archivo = new RandomAccessFile(nomArchivo, "r");
+    public ArrayList<Cargo> lista() throws PersistenciaException {
+        ArrayList<Cargo> lista = new ArrayList<>();
+        try (RandomAccessFile raf = new RandomAccessFile(nomArchivo, "r")) {
+            archivo = raf;
+            while (true) {
+                lista.add(leeCargo());
+            }
         } catch (FileNotFoundException fnfe) {
             return lista;
-        }
-        try {
-            while (true) {
-                cargo = leeCargo();
-                lista.add(cargo);
-            }
         } catch (EOFException eofe) {
             return lista;
         } catch (IOException ioe) {
-            throw new PersistenciaException("Error al leer cargos");
-        } finally {
-            try {
-                archivo.close();
-            } catch (IOException ioe) {}
+            throw new PersistenciaException("Error al leer cargos", ioe);
+        }
+    }
+
+    // ========== MÉTODO ELIMINAR (CORREGIDO) ==========
+    public void elimina(Cargo cargo) throws PersistenciaException {
+        try (RandomAccessFile raf = new RandomAccessFile(nomArchivo, "rw")) {
+            archivo = raf;
+            while (true) {
+                long pos = raf.getFilePointer();
+                Cargo leido = leeCargo();   // <--- CORREGIDO: antes era leerCargo()
+                if (leido.getCodigoCargo().equals(cargo.getCodigoCargo())) {
+                    raf.seek(pos);
+                    borraRegistro();  // Marca como borrado
+                    empaca();         // Reorganiza el archivo
+                    return;
+                }
+            }
+        } catch (EOFException eofe) {
+            throw new PersistenciaException("Cargo no encontrado");
+        } catch (FileNotFoundException fnfe) {
+            throw new PersistenciaException("Archivo de cargos inexistente", fnfe);
+        } catch (IOException ioe) {
+            throw new PersistenciaException("Error al eliminar cargo", ioe);
         }
     }
 }

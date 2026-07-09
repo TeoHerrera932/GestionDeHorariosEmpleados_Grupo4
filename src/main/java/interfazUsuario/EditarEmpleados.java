@@ -3,15 +3,17 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 package interfazUsuario;
+
 import control.Control;
-import interfaces.IFachada;
-import objetosNegocio.Empleado;
+import control.UtileriasGUI;
 import excepciones.FachadaException;
 import fachadas.FachadaArchivos;
+import interfaces.IFachada;
+import objetosNegocio.Empleado;
+
+import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.util.ArrayList;
-import javax.swing.JOptionPane;
-import control.UtileriasGUI;
 /**
  *
  * @author User
@@ -26,30 +28,45 @@ public class EditarEmpleados extends javax.swing.JFrame {
         this.control = new Control();     // ← Inicializamos el control
         initComponents();
         cargarTabla();
+        setExtendedState(JFrame.MAXIMIZED_BOTH);//Maximizar la ventana
     }
     
     private void cargarTabla() {
         DefaultTableModel modelo = (DefaultTableModel) jTable1.getModel();
         modelo.setRowCount(0);
         
+        // Establecer columnas detalladas
+        modelo.setColumnIdentifiers(new String[]{
+            "Código", "Cédula", "Nombres", "Apellidos", "Género", "Estado Civil",
+            "Dirección", "Correo", "Cargo", "Centro Trabajo", "Fecha Ingreso",
+            "Fecha Baja", "Usuario", "Horario", "Celular"
+        });
+        
         try {
-            ArrayList lista = fachada.consultaEmpleados();
-            
-            for (Object obj : lista) {
-                Empleado e = (Empleado) obj;
+            ArrayList<Empleado> lista = fachada.consultaEmpleados();
+            for (Empleado e : lista) {
                 modelo.addRow(new Object[]{
-                    e.getCodigoEmpleado(),
-                    e.getCedula(),
-                    e.getNombres(),
-                    e.getApellidos(),
-                    e.getCargo()
+                    e.getCodigoEmpleado() != null ? e.getCodigoEmpleado() : "",
+                    e.getCedula() != null ? e.getCedula() : "",
+                    e.getNombres() != null ? e.getNombres() : "",
+                    e.getApellidos() != null ? e.getApellidos() : "",
+                    e.getGenero() != null ? e.getGenero() : "",
+                    e.getEstadoCivil() != null ? e.getEstadoCivil() : "",
+                    e.getDireccion() != null ? e.getDireccion() : "",
+                    e.getCorreo() != null ? e.getCorreo() : "",
+                    (e.getCargo() != null) ? e.getCargo().getNombreCargo() : "Sin cargo",
+                    (e.getCargo() != null) ? e.getCargo().getCentroTrabajo() : "",
+                    e.getFechaIngreso() != null ? e.getFechaIngreso().toString() : "",
+                    e.getFechaBaja() != null ? e.getFechaBaja().toString() : "",
+                    e.getUsuario() != null ? e.getUsuario() : "",
+                    e.getHorario() != null ? e.getHorario() : "",
+                    e.getCelular() != null ? e.getCelular() : ""
                 });
             }
         } catch (FachadaException ex) {
-            JOptionPane.showMessageDialog(
-            this,
-            ex.getMessage());
-        }   
+            JOptionPane.showMessageDialog(this, "Error al cargar empleados: " + ex.getMessage(), 
+                                          "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     /**

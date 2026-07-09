@@ -13,47 +13,54 @@ import excepciones.PersistenciaException;
 public class Empleados extends AccesoAleatorio {
 
     public Empleados(String nomArchivo) {
-        super(nomArchivo, 395); // Tamaño ajustado con objeto Cargo
+        super(nomArchivo, 395);
     }
 
+    // ========== LECTURA (mismo orden que la tabla) ==========
     private Empleado leeEmpleado() throws IOException {
         Empleado empleado = new Empleado();
-        empleado.setCodigoEmpleado(leeString(10));
-        empleado.setNombres(leeString(40));
-        empleado.setApellidos(leeString(40));
-        empleado.setFechaNacimiento(leeFecha());
-        empleado.setGenero(leeString(10));
-        empleado.setEstadoCivil(leeString(20));
-        empleado.setDireccion(leeString(60));
-        empleado.setCorreo(leeString(40));
 
-        // Cargo (objeto)
+        empleado.setCodigoEmpleado(leeString(10));   // 1. Código
+        empleado.setCedula(leeString(15));           // 2. Cédula
+        empleado.setNombres(leeString(40));          // 3. Nombres
+        empleado.setApellidos(leeString(40));        // 4. Apellidos
+        empleado.setGenero(leeString(10));           // 5. Género
+        empleado.setEstadoCivil(leeString(20));      // 6. Estado Civil
+        empleado.setDireccion(leeString(60));        // 7. Dirección
+        empleado.setCorreo(leeString(40));           // 8. Correo
+
+        // 9. Cargo (objeto)
         Cargo cargo = new Cargo();
-        cargo.setNombreCargo(leeString(30));
-        cargo.setCentroTrabajo(leeString(40));
+        cargo.setNombreCargo(leeString(30));         // 9a. Nombre del cargo
+        cargo.setCentroTrabajo(leeString(40));       // 10. Centro Trabajo
         empleado.setCargo(cargo);
 
-        empleado.setFechaIngreso(leeFecha());
-        empleado.setFechaBaja(leeFecha());
-        empleado.setUsuario(leeString(20));
-        empleado.setCedula(leeString(15));
-        empleado.setHorario(leeString(20));
-        empleado.setCelular(leeString(15));
+        empleado.setFechaIngreso(leeFecha());        // 11. Fecha Ingreso
+        empleado.setFechaBaja(leeFecha());           // 12. Fecha Baja
+        empleado.setUsuario(leeString(20));          // 13. Usuario
+        empleado.setHorario(leeString(20));          // 14. Horario
+        empleado.setCelular(leeString(15));          // 15. Celular
+
+        // Nota: FechaNacimiento no está en la tabla, pero se guarda igual.
+        // Si quieres mostrarlo, añádelo como columna extra.
+        // Lo dejamos al final para no romper el orden.
+        empleado.setFechaNacimiento(leeFecha());
 
         return empleado;
     }
 
+    // ========== ESCRITURA (mismo orden) ==========
     private void escribeEmpleado(Empleado empleado) throws IOException {
         escribeString(empleado.getCodigoEmpleado(), 10);
+        escribeString(empleado.getCedula(), 15);
         escribeString(empleado.getNombres(), 40);
         escribeString(empleado.getApellidos(), 40);
-        escribeFecha(empleado.getFechaNacimiento());
         escribeString(empleado.getGenero(), 10);
         escribeString(empleado.getEstadoCivil(), 20);
         escribeString(empleado.getDireccion(), 60);
         escribeString(empleado.getCorreo(), 40);
 
-        // Cargo (objeto)
+        // Cargo
         Cargo cargo = empleado.getCargo();
         escribeString(cargo != null ? cargo.getNombreCargo() : "", 30);
         escribeString(cargo != null ? cargo.getCentroTrabajo() : "", 40);
@@ -61,138 +68,94 @@ public class Empleados extends AccesoAleatorio {
         escribeFecha(empleado.getFechaIngreso());
         escribeFecha(empleado.getFechaBaja());
         escribeString(empleado.getUsuario(), 20);
-        escribeString(empleado.getCedula(), 15);
         escribeString(empleado.getHorario(), 20);
         escribeString(empleado.getCelular(), 15);
+
+        // FechaNacimiento (opcional)
+        escribeFecha(empleado.getFechaNacimiento());
     }
 
+    // ========== MÉTODOS PÚBLICOS ==========
     public Empleado obten(Empleado empleado) throws PersistenciaException {
-        Empleado empleadoLeido;
-        try {
-            archivo = new RandomAccessFile(nomArchivo, "r");
-        } catch (FileNotFoundException fnfe) {
-            throw new PersistenciaException("Archivo inexistente");
-        }
-        try {
+        try (RandomAccessFile raf = new RandomAccessFile(nomArchivo, "r")) {
+            archivo = raf;
             while (true) {
-                empleadoLeido = leeEmpleado();
-                if (empleado.equals(empleadoLeido)) {
-                    return empleadoLeido;
+                Empleado leido = leeEmpleado();
+                if (leido.getCodigoEmpleado().equals(empleado.getCodigoEmpleado())) {
+                    return leido;
                 }
             }
-        } catch (EOFException eofe) {
+        } catch (EOFException e) {
             return null;
-        } catch (IOException ioe) {
-            throw new PersistenciaException("Error al acceder al archivo");
-        } finally {
-            try {
-                archivo.close();
-            } catch (IOException ioe) {
-                throw new PersistenciaException("Error al cerrar el archivo");
-            }
+        } catch (FileNotFoundException e) {
+            throw new PersistenciaException("Archivo inexistente", e);
+        } catch (IOException e) {
+            throw new PersistenciaException("Error al leer empleado", e);
         }
     }
 
     public void agrega(Empleado empleado) throws PersistenciaException {
-        try {
-            archivo = new RandomAccessFile(nomArchivo, "rw");
-            archivo.seek(archivo.length());
+        try (RandomAccessFile raf = new RandomAccessFile(nomArchivo, "rw")) {
+            archivo = raf;
+            raf.seek(raf.length());
             escribeEmpleado(empleado);
-        } catch (FileNotFoundException fnfe) {
-            throw new PersistenciaException("Archivo inexistente");
-        } catch (IOException ioe) {
-            throw new PersistenciaException("Error al acceder al archivo");
-        } finally {
-            try {
-                if (archivo != null) archivo.close();
-            } catch (IOException ioe) {
-                throw new PersistenciaException("Error al cerrar el archivo");
-            }
+        } catch (IOException e) {
+            throw new PersistenciaException("Error al agregar empleado", e);
         }
     }
 
     public void actualiza(Empleado empleado) throws PersistenciaException {
-        Empleado empleadoLeido;
-        try {
-            archivo = new RandomAccessFile(nomArchivo, "rw");
-        } catch (FileNotFoundException fnfe) {
-            throw new PersistenciaException("Archivo inexistente");
-        }
-        try {
+        try (RandomAccessFile raf = new RandomAccessFile(nomArchivo, "rw")) {
+            archivo = raf;
             while (true) {
-                empleadoLeido = leeEmpleado();
-                if (empleado.equals(empleadoLeido)) {
-                    archivo.seek(archivo.getFilePointer() - tamRegistro);
+                long pos = raf.getFilePointer();
+                Empleado leido = leeEmpleado();
+                if (leido.getCodigoEmpleado().equals(empleado.getCodigoEmpleado())) {
+                    raf.seek(pos);
                     escribeEmpleado(empleado);
-                    break;
+                    return;
                 }
             }
-        } catch (EOFException eofe) {
-            throw new PersistenciaException("El empleado no existe");
-        } catch (IOException ioe) {
-            throw new PersistenciaException("Error al acceder al archivo");
-        } finally {
-            try {
-                archivo.close();
-            } catch (IOException ioe) {
-                throw new PersistenciaException("Error al cerrar el archivo");
-            }
+        } catch (EOFException e) {
+            throw new PersistenciaException("Empleado no encontrado", e);
+        } catch (IOException e) {
+            throw new PersistenciaException("Error al actualizar empleado", e);
         }
     }
 
     public void elimina(Empleado empleado) throws PersistenciaException {
-        Empleado empleadoLeido;
-        try {
-            archivo = new RandomAccessFile(nomArchivo, "rw");
-        } catch (FileNotFoundException fnfe) {
-            throw new PersistenciaException("Archivo inexistente");
-        }
-        try {
+        try (RandomAccessFile raf = new RandomAccessFile(nomArchivo, "rw")) {
+            archivo = raf;
             while (true) {
-                empleadoLeido = leeEmpleado();
-                if (empleado.equals(empleadoLeido)) {
-                    archivo.seek(archivo.getFilePointer() - tamRegistro);
+                long pos = raf.getFilePointer();
+                Empleado leido = leeEmpleado();
+                if (leido.getCodigoEmpleado().equals(empleado.getCodigoEmpleado())) {
+                    raf.seek(pos);
                     borraRegistro();
                     empaca();
-                    break;
+                    return;
                 }
             }
-        } catch (EOFException eofe) {
-            throw new PersistenciaException("El empleado no existe");
-        } catch (IOException ioe) {
-            throw new PersistenciaException("Error al acceder al archivo");
-        } finally {
-            try {
-                archivo.close();
-            } catch (IOException ioe) {
-                throw new PersistenciaException("Error al cerrar el archivo");
-            }
+        } catch (EOFException e) {
+            throw new PersistenciaException("Empleado no encontrado", e);
+        } catch (IOException e) {
+            throw new PersistenciaException("Error al eliminar empleado", e);
         }
     }
 
-    public ArrayList lista() throws PersistenciaException {
-        ArrayList lista = new ArrayList();
-        Empleado empleado;
-        try {
-            archivo = new RandomAccessFile(nomArchivo, "r");
-        } catch (FileNotFoundException fnfe) {
-            return lista;
-        }
-        try {
+    public ArrayList<Empleado> lista() throws PersistenciaException {
+        ArrayList<Empleado> lista = new ArrayList<>();
+        try (RandomAccessFile raf = new RandomAccessFile(nomArchivo, "r")) {
+            archivo = raf;
             while (true) {
-                empleado = leeEmpleado();
-                lista.add(empleado);
+                lista.add(leeEmpleado());
             }
-        } catch (EOFException eofe) {
+        } catch (FileNotFoundException e) {
             return lista;
-        } catch (IOException ioe) {
-            throw new PersistenciaException("Error al acceder al archivo");
-        } finally {
-            try {
-                archivo.close();
-            } catch (IOException ioe) {
-                throw new PersistenciaException("Error al cerrar el archivo");
-            }
+        } catch (EOFException e) {
+            return lista;
+        } catch (IOException e) {
+            throw new PersistenciaException("Error al listar empleados", e);
         }
     }
 }
