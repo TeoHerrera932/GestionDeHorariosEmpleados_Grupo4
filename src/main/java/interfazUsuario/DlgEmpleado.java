@@ -1,14 +1,25 @@
 package interfazUsuario;
 
-import javax.swing.*;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.FlowLayout;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
-import objetosNegocio.Empleado;
-import objetosNegocio.Cargo;
-import objetosServicio.Fecha;
-import control.UtileriasGUI;
+
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+
 import control.Control;
+import control.UtileriasGUI;
 import excepciones.FachadaException;
+import objetosNegocio.Cargo;
+import objetosNegocio.Empleado;
 
 public class DlgEmpleado extends JDialog {
 
@@ -90,9 +101,15 @@ public class DlgEmpleado extends JDialog {
         panel.add(txtCelular = new JTextField(15));
 
         // Fechas
+        txtDiaNac = new JTextField(3);
+        txtMesNac = new JTextField(3);
+        txtAnioNac = new JTextField(5);
         panel.add(new JLabel("Fecha Nacimiento (dd/mm/aaaa):"));
         panel.add(createFechaPanel(txtDiaNac, txtMesNac, txtAnioNac));
 
+        txtDiaIng = new JTextField(3);
+        txtMesIng = new JTextField(3);
+        txtAnioIng = new JTextField(5);
         panel.add(new JLabel("Fecha Ingreso (dd/mm/aaaa):"));
         panel.add(createFechaPanel(txtDiaIng, txtMesIng, txtAnioIng));
 
@@ -118,11 +135,11 @@ public class DlgEmpleado extends JDialog {
 
     private JPanel createFechaPanel(JTextField dia, JTextField mes, JTextField anio) {
         JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
-        p.add(dia = new JTextField(3));
+        p.add(dia);
         p.add(new JLabel("/"));
-        p.add(mes = new JTextField(3));
+        p.add(mes);
         p.add(new JLabel("/"));
-        p.add(anio = new JTextField(5));
+        p.add(anio);
         return p;
     }
 
