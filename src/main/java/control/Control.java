@@ -149,6 +149,13 @@ public class Control {
             }
         }
     }
+    public Asistencia obtenerAsistenciaPendiente(String codigoEmpleado) throws FachadaException {
+        return fachada.obtenerAsistenciaPendiente(codigoEmpleado);
+    }
+
+    public void actualizarAsistencia(Asistencia asistencia) throws FachadaException {
+        fachada.actualizarAsistencia(asistencia);
+    }
 
     // ================== MÉTODOS PARA USUARIOS ==================
     public Usuario login(String nombreUsuario, String contrasena) {
@@ -178,23 +185,8 @@ public class Control {
     }
 
     // ================== ASISTENCIAS ==================
-    public void registrarAsistencia(String codigoEmpleado, String horaIngreso, String horaSalida) {
-        try {
-            java.util.Calendar cal = java.util.Calendar.getInstance();
-            Fecha fechaActual = new Fecha(
-                    cal.get(java.util.Calendar.DAY_OF_MONTH),
-                    cal.get(java.util.Calendar.MONTH) + 1,
-                    cal.get(java.util.Calendar.YEAR)
-            );
-            Asistencia asistencia = new Asistencia(codigoEmpleado, fechaActual, horaIngreso);
-            if (horaSalida != null && !horaSalida.trim().isEmpty()) {
-                asistencia.setHoraSalida(horaSalida);
-            }
-            fachada.registraAsistencia(asistencia);
-            JOptionPane.showMessageDialog(null, " Asistencia registrada correctamente");
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-        }
+    public void registrarAsistencia(Asistencia asistencia) throws FachadaException {
+        fachada.registraAsistencia(asistencia);  // Necesita que registraAsistencia acepte Asistencia
     }
 
     public ArrayList<Asistencia> consultaAsistenciasPorEmpleado(String codigo) throws FachadaException {

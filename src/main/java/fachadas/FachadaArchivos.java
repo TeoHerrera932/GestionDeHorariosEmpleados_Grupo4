@@ -182,6 +182,37 @@ public class FachadaArchivos implements IFachada {
             throw new FachadaException("Error filtrar asistencias por fecha", e);
         }
     }
+    @Override
+    public Asistencia obtenerAsistenciaPendiente(String codigoEmpleado) throws FachadaException {
+        try {
+            // Obtener todas las asistencias del empleado
+            ArrayList<Asistencia> lista = catalogoAsistencias.listaPorEmpleado(codigoEmpleado);
+            // Obtener fecha actual
+            java.util.Calendar cal = java.util.Calendar.getInstance();
+            Fecha hoy = new Fecha(
+                    cal.get(java.util.Calendar.DAY_OF_MONTH),
+                    cal.get(java.util.Calendar.MONTH) + 1,
+                    cal.get(java.util.Calendar.YEAR)
+            );
+            // Buscar la primera pendiente del día actual
+            return lista.stream()
+                    .filter(a -> a.getEstado().equals("PENDIENTE"))
+                    .filter(a -> a.getFecha().equals(hoy))
+                    .findFirst()
+                    .orElse(null);
+        } catch (PersistenciaException e) {
+            throw new FachadaException("Error al obtener asistencia pendiente", e);
+        }
+    }
+
+    @Override
+    public void actualizarAsistencia(Asistencia asistencia) throws FachadaException {
+        try {
+            catalogoAsistencias.actualiza(asistencia);
+        } catch (PersistenciaException e) {
+            throw new FachadaException("Error al actualizar asistencia", e);
+        }
+    }
 
     // ====================== AUSENCIAS ======================
     @Override

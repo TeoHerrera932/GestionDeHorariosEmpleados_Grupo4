@@ -87,4 +87,24 @@ public class Asistencias extends AccesoAleatorio {
             throw new PersistenciaException("Error al leer asistencias", e);
         }
     }
+    public void actualiza(Asistencia asistencia) throws PersistenciaException {
+        try (RandomAccessFile raf = new RandomAccessFile(nomArchivo, "rw")) {
+            archivo = raf;
+            while (true) {
+                long pos = raf.getFilePointer();
+                Asistencia leida = leeAsistencia();
+                // Comparar por código y fecha (asumimos que fecha es igual)
+                if (leida.getCodigoEmpleado().equals(asistencia.getCodigoEmpleado()) &&
+                        leida.getFecha().equals(asistencia.getFecha())) {
+                    raf.seek(pos);
+                    escribeAsistencia(asistencia);
+                    return;
+                }
+            }
+        } catch (EOFException e) {
+            throw new PersistenciaException("No se encontró la asistencia para actualizar");
+        } catch (IOException e) {
+            throw new PersistenciaException("Error al actualizar asistencia", e);
+        }
+    }
 }

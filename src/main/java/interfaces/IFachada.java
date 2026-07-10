@@ -38,6 +38,8 @@ public interface IFachada {
     // Asistencias
     void registraAsistencia(Asistencia asistencia) throws FachadaException;
     ArrayList consultaAsistenciasPorEmpleado(String codigoEmpleado) throws FachadaException;
+    Asistencia obtenerAsistenciaPendiente(String codigoEmpleado) throws FachadaException;
+    void actualizarAsistencia(Asistencia asistencia) throws FachadaException;
     // Asistencias – consultas adicionales
     ArrayList<Asistencia> consultaAsistencias() throws FachadaException;
     ArrayList<Asistencia> consultaAsistenciasPorFecha(Fecha fecha) throws FachadaException;
