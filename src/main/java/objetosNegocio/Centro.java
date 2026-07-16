@@ -24,8 +24,7 @@ public class Centro {
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
-        if (!(obj instanceof Centro)) return false;
-        Centro c = (Centro) obj;
+        if (!(obj instanceof Centro c)) return false;
         return codigo != null && codigo.equals(c.codigo);
     }
 

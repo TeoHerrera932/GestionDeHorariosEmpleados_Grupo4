@@ -3,7 +3,7 @@ package interfazUsuario;
 import control.Control;
 import excepciones.FachadaException;
 import objetosNegocio.Asistencia;
-import objetosServicio.Fecha;
+import objetosNegocio.Empleado;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -14,7 +14,7 @@ import java.util.ArrayList;
 public class DlgBuscarAsistenciasEmpleado extends JDialog {
 
     private Control control;
-    private JTextField txtCodigoEmpleado;
+    private JComboBox<Empleado> cmbEmpleados;  // ← ComboBox de empleados
     private JTable tablaAsistencias;
     private DefaultTableModel modeloTabla;
     private JButton btnBuscar, btnCerrar;
@@ -30,11 +30,14 @@ public class DlgBuscarAsistenciasEmpleado extends JDialog {
     private void initUI() {
         setLayout(new BorderLayout(10, 10));
 
-        // Panel superior
+        // Panel superior con el ComboBox
         JPanel panelSuperior = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        panelSuperior.add(new JLabel("Código Empleado:"));
-        txtCodigoEmpleado = new JTextField(15);
-        panelSuperior.add(txtCodigoEmpleado);
+        panelSuperior.add(new JLabel("Seleccione Empleado:"));
+
+        cmbEmpleados = new JComboBox<>();
+        cargarEmpleados();  // ← Cargar todos los empleados
+        panelSuperior.add(cmbEmpleados);
+
         btnBuscar = new JButton("Buscar");
         btnBuscar.addActionListener(this::buscar);
         panelSuperior.add(btnBuscar);
@@ -54,13 +57,34 @@ public class DlgBuscarAsistenciasEmpleado extends JDialog {
         add(panelInferior, BorderLayout.SOUTH);
     }
 
+    // ========== CARGAR EMPLEADOS EN EL COMBO ==========
+    private void cargarEmpleados() {
+        try {
+            ArrayList<Empleado> empleados = control.obtenerTodosLosEmpleados();
+            for (Empleado e : empleados) {
+                cmbEmpleados.addItem(e);
+            }
+            if (cmbEmpleados.getItemCount() > 0) {
+                cmbEmpleados.setSelectedIndex(0);
+            }
+        } catch (FachadaException ex) {
+            JOptionPane.showMessageDialog(this,
+                    "Error al cargar empleados: " + ex.getMessage(),
+                    "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    // ========== BUSCAR ASISTENCIAS ==========
     private void buscar(ActionEvent e) {
-        String codigo = txtCodigoEmpleado.getText().trim();
-        if (codigo.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Ingrese un código de empleado");
+        Empleado seleccionado = (Empleado) cmbEmpleados.getSelectedItem();
+        if (seleccionado == null) {
+            JOptionPane.showMessageDialog(this, "Seleccione un empleado");
             return;
         }
+
+        String codigo = seleccionado.getCodigoEmpleado();
         modeloTabla.setRowCount(0);
+
         try {
             ArrayList<Asistencia> asistencias = control.consultaAsistenciasPorEmpleado(codigo);
             for (Asistencia a : asistencias) {

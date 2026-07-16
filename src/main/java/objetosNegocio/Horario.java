@@ -18,10 +18,13 @@ public class Horario {
     // Getters y Setters
     public String getCodigo() { return codigo; }
     public void setCodigo(String codigo) { this.codigo = codigo; }
+
     public String getNombre() { return nombre; }
     public void setNombre(String nombre) { this.nombre = nombre; }
+
     public String getHoraInicio() { return horaInicio; }
     public void setHoraInicio(String horaInicio) { this.horaInicio = horaInicio; }
+
     public String getHoraFin() { return horaFin; }
     public void setHoraFin(String horaFin) { this.horaFin = horaFin; }
 
@@ -33,8 +36,7 @@ public class Horario {
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
-        if (!(obj instanceof Horario)) return false;
-        Horario h = (Horario) obj;
+        if (!(obj instanceof Horario h)) return false;
         return codigo != null && codigo.equals(h.codigo);
     }
 

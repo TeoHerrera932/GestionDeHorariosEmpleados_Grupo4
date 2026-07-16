@@ -1,6 +1,6 @@
 package objetosServicio;
 
-public class Fecha {
+public class Fecha {//Setea la fecha que vamos a utilizar para las demas clases
     private int dia;
     private int mes;
     private int anio;

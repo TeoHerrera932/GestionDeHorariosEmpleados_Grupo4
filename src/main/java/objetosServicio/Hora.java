@@ -1,6 +1,6 @@
 package objetosServicio;
 
-public class Hora {
+public class Hora { //Sirve para establecer la hora
 
     private int hora;
     private int minuto;

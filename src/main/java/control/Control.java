@@ -280,4 +280,19 @@ public class Control {
         }
         return null;
     }
+    // En Control.java
+    public ArrayList<Empleado> obtenerTodosLosEmpleados() throws FachadaException {
+        return fachada.consultaEmpleados();
+    }
+
+    public DefaultComboBoxModel<String> obtenerModeloEmpleados() throws FachadaException {
+        DefaultComboBoxModel<String> modelo = new DefaultComboBoxModel<>();
+        ArrayList<Empleado> empleados = fachada.consultaEmpleados();
+        for (Empleado e : empleados) {
+            String texto = e.getCodigoEmpleado() + " - " + e.getNombres() + " " + e.getApellidos();
+            // Guardamos el código como "valor oculto" usando un objeto personalizado o un mapa
+            modelo.addElement(texto);
+        }
+        return modelo;
+    }
 }

@@ -56,7 +56,7 @@ public class Horarios extends AccesoAleatorio {
         }
     }
 
-    // ================ NUEVO MÉTODO lista() ================
+    // ================ NUEVO METODO lista() ================
     public ArrayList<Horario> lista() throws PersistenciaException {
         ArrayList<Horario> lista = new ArrayList<>();
         try (RandomAccessFile raf = new RandomAccessFile(nomArchivo, "r")) {
