@@ -1,15 +1,23 @@
 package control;
 
-import javax.swing.*;
 import java.util.ArrayList;
 
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+
 import excepciones.FachadaException;
-import objetosServicio.*;
-import objetosNegocio.*;
-import interfaces.IFachada;
 import fachadas.FachadaArchivos;
-import interfazUsuario.*;
+import interfaces.IFachada;
 import interfazUsuario.DlgEmpleado;
+import objetosNegocio.Asistencia;
+import objetosNegocio.Ausencia;
+import objetosNegocio.Cargo;
+import objetosNegocio.Centro;
+import objetosNegocio.Empleado;
+import objetosNegocio.Horario;
+import objetosNegocio.Usuario;
+import objetosNegocio.Vacacion;
 
 public class Control {
 
@@ -149,8 +157,13 @@ public class Control {
             }
         }
     }
+    public Asistencia obtenerAsistenciaPendiente(String codigoEmpleado, boolean esNocturno) throws FachadaException {
+        return fachada.obtenerAsistenciaPendiente(codigoEmpleado, esNocturno);
+    }
+
+    // Sobrecarga para compatibilidad: asume esNocturno = false
     public Asistencia obtenerAsistenciaPendiente(String codigoEmpleado) throws FachadaException {
-        return fachada.obtenerAsistenciaPendiente(codigoEmpleado);
+        return obtenerAsistenciaPendiente(codigoEmpleado, false);
     }
 
     public void actualizarAsistencia(Asistencia asistencia) throws FachadaException {

@@ -183,23 +183,43 @@ public class FachadaArchivos implements IFachada {
         }
     }
     @Override
-    public Asistencia obtenerAsistenciaPendiente(String codigoEmpleado) throws FachadaException {
+    public Asistencia obtenerAsistenciaPendiente(String codigoEmpleado, boolean esNocturno) throws FachadaException {
         try {
-            // Obtener todas las asistencias del empleado
-            ArrayList<Asistencia> lista = catalogoAsistencias.listaPorEmpleado(codigoEmpleado);
-            // Obtener fecha actual
             java.util.Calendar cal = java.util.Calendar.getInstance();
             Fecha hoy = new Fecha(
                     cal.get(java.util.Calendar.DAY_OF_MONTH),
                     cal.get(java.util.Calendar.MONTH) + 1,
                     cal.get(java.util.Calendar.YEAR)
             );
-            // Buscar la primera pendiente del día actual
-            return lista.stream()
-                    .filter(a -> a.getEstado().equals("PENDIENTE"))
-                    .filter(a -> a.getFecha().equals(hoy))
-                    .findFirst()
-                    .orElse(null);
+
+            // Si es nocturno, también buscar en el día anterior
+            Fecha diaBusqueda = hoy;
+            if (esNocturno) {
+                cal.add(java.util.Calendar.DAY_OF_MONTH, -1);
+                diaBusqueda = new Fecha(
+                        cal.get(java.util.Calendar.DAY_OF_MONTH),
+                        cal.get(java.util.Calendar.MONTH) + 1,
+                        cal.get(java.util.Calendar.YEAR)
+                );
+                // Restaurar cal para futuras operaciones
+                cal.add(java.util.Calendar.DAY_OF_MONTH, 1);
+            }
+
+            ArrayList<Asistencia> lista = catalogoAsistencias.listaPorEmpleado(codigoEmpleado);
+            // Buscar primero en el día de hoy, luego en el día anterior (si nocturno)
+            for (Asistencia a : lista) {
+                if (a.getEstado().equals("PENDIENTE") && a.getFecha().equals(hoy)) {
+                    return a;
+                }
+            }
+            if (esNocturno) {
+                for (Asistencia a : lista) {
+                    if (a.getEstado().equals("PENDIENTE") && a.getFecha().equals(diaBusqueda)) {
+                        return a;
+                    }
+                }
+            }
+            return null;
         } catch (PersistenciaException e) {
             throw new FachadaException("Error al obtener asistencia pendiente", e);
         }

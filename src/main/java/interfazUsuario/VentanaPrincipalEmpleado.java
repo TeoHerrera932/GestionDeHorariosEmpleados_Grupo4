@@ -4,15 +4,18 @@
  */
 package interfazUsuario;
 
-import control.Control;
-import excepciones.FachadaException;
-import objetosNegocio.*;
-import objetosServicio.Fecha;
-
-import javax.swing.*;
-import java.awt.event.ActionEvent;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JOptionPane;
+import javax.swing.Timer;
+
+import control.Control;
+import excepciones.FachadaException;
+import objetosNegocio.Asistencia;
+import objetosNegocio.Usuario;
+import objetosServicio.Fecha;
 /**
  *
  * @author User
@@ -25,8 +28,9 @@ public class VentanaPrincipalEmpleado extends javax.swing.JFrame {
     private String fechaActual;
     private Timer timer;
     private String codigoEmpleadoLogueado;
-    
     private Asistencia asistenciaPendiente;
+    
+    // Nuevos componentes
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(VentanaPrincipalEmpleado.class.getName());
 
@@ -42,24 +46,49 @@ public class VentanaPrincipalEmpleado extends javax.swing.JFrame {
         this.usuarioLogueado = usuario;
         
         // Obtener código de empleado a partir del usuario logueado
-         if (usuarioLogueado != null) {
+        if (usuarioLogueado != null) {
             try {
                 codigoEmpleadoLogueado = control.obtenerCodigoEmpleadoPorUsuario(usuarioLogueado.getUsuario());
                 if (codigoEmpleadoLogueado == null) {
-                    codigoEmpleadoLogueado = solicitarCodigoEmpleado();
+                    int opt = JOptionPane.showConfirmDialog(this,
+                            "No se encontró un empleado asociado a su usuario.\n¿Desea ingresar su código manualmente?",
+                            "Código no encontrado", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+                    if (opt == JOptionPane.YES_OPTION) {
+                        codigoEmpleadoLogueado = solicitarCodigoEmpleado();
+                        if (codigoEmpleadoLogueado == null) {
+                            dispose();
+                            return;
+                        }
+                    } else {
+                        dispose();
+                        return;
+                    }
                 }
             } catch (FachadaException ex) {
                 JOptionPane.showMessageDialog(this,
                         "Error al obtener código de empleado: " + ex.getMessage(),
                         "Error", JOptionPane.ERROR_MESSAGE);
-                codigoEmpleadoLogueado = solicitarCodigoEmpleado();
+                dispose();
+                return;
             }
         } else {
+            // Usuario no proporcionado: solicitar código de empleado manualmente
             codigoEmpleadoLogueado = solicitarCodigoEmpleado();
+            if (codigoEmpleadoLogueado == null) {
+                JOptionPane.showMessageDialog(this,
+                        "No se ha iniciado sesión correctamente.",
+                        "Error", JOptionPane.ERROR_MESSAGE);
+                dispose();
+                return;
+            }
         }
         
         
+        
         initComponents();
+            jComboBox1.setModel(new DefaultComboBoxModel<>(new String[]{"Entrada", "Salida"}));
+            jButton4.addActionListener(this::registrarAccion); // ← AÑADE ESTA LÍNEA
+        
         setLocationRelativeTo(null);
     
         
@@ -90,39 +119,43 @@ public class VentanaPrincipalEmpleado extends javax.swing.JFrame {
     }
      // ========== NUEVO: VERIFICAR SESIÓN ACTIVA ==========
      private void verificarSesionActiva() {
-        if (codigoEmpleadoLogueado == null) {
-            jButton1.setEnabled(false);
-            jButton3.setEnabled(false);
-            return;
-        }
-
-        try {
-            // Buscar asistencia pendiente del día actual
-            asistenciaPendiente = control.obtenerAsistenciaPendiente(codigoEmpleadoLogueado);
-            if (asistenciaPendiente != null) {
-                // Mostrar la hora de entrada
-                jFormattedTextField1.setText(asistenciaPendiente.getHoraIngreso());
-                jLabel7.setText(asistenciaPendiente.getFecha().toString());
-                horaEntradaRegistrada = asistenciaPendiente.getHoraIngreso();
-
-                // Configurar botones
-                jButton1.setEnabled(false);
-                jButton3.setEnabled(true);
-
-                JOptionPane.showMessageDialog(this,
-                        "Sesión activa encontrada.\nEntrada: " + horaEntradaRegistrada,
-                        "Sesión Activa", JOptionPane.INFORMATION_MESSAGE);
-            } else {
-                // No hay sesión activa
-                jButton1.setEnabled(true);
-                jButton3.setEnabled(false);
-            }
-        } catch (FachadaException ex) {
-            JOptionPane.showMessageDialog(this,
-                    "Error al verificar sesión: " + ex.getMessage(),
-                    "Error", JOptionPane.ERROR_MESSAGE);
-        }
+    if (codigoEmpleadoLogueado == null) {
+        jComboBox1.setEnabled(false);
+        jButton4.setEnabled(false);
+        return;
     }
+
+    try {
+        // Buscar asistencia pendiente del día actual
+        asistenciaPendiente = control.obtenerAsistenciaPendiente(codigoEmpleadoLogueado);
+        if (asistenciaPendiente != null) {
+            // Mostrar la hora de entrada
+            jFormattedTextField1.setText(asistenciaPendiente.getHoraIngreso());
+            jLabel7.setText(asistenciaPendiente.getFecha().toString());
+            horaEntradaRegistrada = asistenciaPendiente.getHoraIngreso();
+
+            // Configurar combo y botón: solo permitir Salida
+            jComboBox1.setSelectedItem("Salida");
+            jComboBox1.setEnabled(false); // fijar en Salida
+            jButton4.setEnabled(true);
+
+            JOptionPane.showMessageDialog(this,
+                    "Sesión activa encontrada.\nEntrada: " + horaEntradaRegistrada,
+                    "Sesión Activa", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            // No hay sesión activa: solo permitir Entrada
+            jComboBox1.setSelectedItem("Entrada");
+            jComboBox1.setEnabled(true);
+            jButton4.setEnabled(true);
+        }
+    } catch (FachadaException ex) {
+        JOptionPane.showMessageDialog(this,
+                "Error al verificar sesión: " + ex.getMessage(),
+                "Error", JOptionPane.ERROR_MESSAGE);
+        jComboBox1.setEnabled(false);
+        jButton4.setEnabled(false);
+    }
+}
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -133,7 +166,6 @@ public class VentanaPrincipalEmpleado extends javax.swing.JFrame {
     private void initComponents() {
 
         jLabel1 = new javax.swing.JLabel();
-        jButton1 = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
         jFormattedTextField1 = new javax.swing.JFormattedTextField();
         jLabel2 = new javax.swing.JLabel();
@@ -141,16 +173,14 @@ public class VentanaPrincipalEmpleado extends javax.swing.JFrame {
         jFormattedTextField2 = new javax.swing.JFormattedTextField();
         jLabel4 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
-        jButton3 = new javax.swing.JButton();
         jLabel6 = new javax.swing.JLabel();
         jLabel7 = new javax.swing.JLabel();
+        jButton4 = new javax.swing.JButton();
+        jComboBox1 = new javax.swing.JComboBox<>();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
         jLabel1.setText("REGISTRO DE ASISTENCIA");
-
-        jButton1.setText("Registrar Entrada");
-        jButton1.addActionListener(this::jButton1ActionPerformed);
 
         jButton2.setText("Salir");
         jButton2.addActionListener(this::jButton2ActionPerformed);
@@ -167,12 +197,14 @@ public class VentanaPrincipalEmpleado extends javax.swing.JFrame {
 
         jLabel5.setText("Fecha");
 
-        jButton3.setText("Registrar Salida");
-        jButton3.addActionListener(this::jButton3ActionPerformed);
-
         jLabel6.setText("--:--:--");
 
         jLabel7.setText("dd/MM/yyyy");
+
+        jButton4.setText("Registrar");
+        jButton4.addActionListener(this::jButton4ActionPerformed);
+
+        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -197,10 +229,11 @@ public class VentanaPrincipalEmpleado extends javax.swing.JFrame {
                 .addGap(0, 78, Short.MAX_VALUE))
             .addGroup(layout.createSequentialGroup()
                 .addGap(139, 139, 139)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jButton2)
-                    .addComponent(jButton3)
-                    .addComponent(jButton1))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(jButton4)
+                        .addComponent(jButton2)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -224,11 +257,11 @@ public class VentanaPrincipalEmpleado extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel3)
                     .addComponent(jFormattedTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 7, Short.MAX_VALUE)
+                .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
-                .addComponent(jButton1)
+                .addComponent(jButton4)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jButton3)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jButton2)
                 .addGap(61, 61, 61))
         );
@@ -250,66 +283,22 @@ public class VentanaPrincipalEmpleado extends javax.swing.JFrame {
         });
         timer.start();
     }
-    // ================== ACCIÓN: REGISTRAR ENTRADA ==================
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        if (codigoEmpleadoLogueado == null) {
-            JOptionPane.showMessageDialog(this, 
-                "No se tiene un código de empleado asociado. Contacte al administrador.",
-                "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
+   //=================Registrar accion =========================
+    private void registrarAccion(java.awt.event.ActionEvent evt) {
+    if (codigoEmpleadoLogueado == null) {
+        JOptionPane.showMessageDialog(this, "No se tiene código de empleado.", "Error", JOptionPane.ERROR_MESSAGE);
+        return;
+    }
 
-        // Verificar que no haya una pendiente (por si acaso)
-        try {
-            Asistencia pendiente = control.obtenerAsistenciaPendiente(codigoEmpleadoLogueado);
-            if (pendiente != null) {
-                JOptionPane.showMessageDialog(this,
-                        "Ya tiene una sesión activa. Registre la salida primero.",
-                        "Sesión Activa", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-        } catch (FachadaException ex) {
-            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        
-        SimpleDateFormat sdfHora = new SimpleDateFormat("HH:mm");
-        String horaActual = sdfHora.format(new Date());
-        jFormattedTextField1.setText(horaActual);
-        horaEntradaRegistrada = horaActual;
+    String accion = (String) jComboBox1.getSelectedItem();
 
-        SimpleDateFormat sdfFecha = new SimpleDateFormat("dd/MM/yyyy");
-        fechaActual = sdfFecha.format(new Date());
-        jLabel7.setText(fechaActual);
-
-        // Crear asistencia con estado PENDIENTE
-        java.util.Calendar cal = java.util.Calendar.getInstance();
-        Fecha fecha = new Fecha(
-                cal.get(java.util.Calendar.DAY_OF_MONTH),
-                cal.get(java.util.Calendar.MONTH) + 1,
-                cal.get(java.util.Calendar.YEAR)
-        );
-        Asistencia asistencia = new Asistencia(codigoEmpleadoLogueado, fecha, horaActual);
-        asistencia.setEstado("PENDIENTE");
-        asistencia.setHoraSalida("");
-
-        try {
-            // Guardar la asistencia con estado PENDIENTE
-            control.registrarAsistencia(asistencia); // Necesita un método que acepte Asistencia
-            asistenciaPendiente = asistencia;
-            jButton1.setEnabled(false);
-            jButton3.setEnabled(true);
-            JOptionPane.showMessageDialog(this,
-                    "Entrada registrada a las " + horaActual + "\nFecha: " + fechaActual,
-                    "Registro de Entrada", JOptionPane.INFORMATION_MESSAGE);
-        } catch (FachadaException ex) {
-            JOptionPane.showMessageDialog(this,
-                    "Error al registrar entrada: " + ex.getMessage(),
-                    "Error", JOptionPane.ERROR_MESSAGE);
-        }
+    if ("Entrada".equals(accion)) {
+        registrarEntrada();
+    } else if ("Salida".equals(accion)) {
+        registrarSalida();
+    }
+}
     
-    }//GEN-LAST:event_jButton1ActionPerformed
-
     private void jFormattedTextField1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jFormattedTextField1ActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_jFormattedTextField1ActionPerformed
@@ -318,62 +307,114 @@ public class VentanaPrincipalEmpleado extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_jFormattedTextField2ActionPerformed
 
-    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
-       if (horaEntradaRegistrada == null || asistenciaPendiente == null) {
-            JOptionPane.showMessageDialog(this,
-                    "No hay sesión activa. Registre la entrada primero.",
-                    "Error", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-
-        int confirm = JOptionPane.showConfirmDialog(this,
-                "¿Seguro que desea registrar la salida?",
-                "Confirmar Salida",
-                JOptionPane.YES_NO_OPTION,
-                JOptionPane.QUESTION_MESSAGE);
-
-        if (confirm == JOptionPane.YES_OPTION) {
-            SimpleDateFormat sdfHora = new SimpleDateFormat("HH:mm");
-            String horaSalida = sdfHora.format(new Date());
-            jFormattedTextField2.setText(horaSalida);
-
-            // Actualizar la asistencia pendiente
-            asistenciaPendiente.setHoraSalida(horaSalida);
-            asistenciaPendiente.setEstado("PRESENTE");
-
-            try {
-                // Actualizar el registro en el archivo
-                control.actualizarAsistencia(asistenciaPendiente);
-
-                // Limpiar campos
-                jFormattedTextField1.setText("");
-                jFormattedTextField2.setText("");
-                horaEntradaRegistrada = null;
-                asistenciaPendiente = null;
-                jButton1.setEnabled(true);
-                jButton3.setEnabled(false);
-
-                JOptionPane.showMessageDialog(this,
-                        "Salida registrada correctamente.",
-                        "Registro de Salida", JOptionPane.INFORMATION_MESSAGE);
-            } catch (FachadaException ex) {
-                JOptionPane.showMessageDialog(this,
-                        "Error al registrar salida: " + ex.getMessage(),
-                        "Error", JOptionPane.ERROR_MESSAGE);
-            }
-        }
-    
-    }//GEN-LAST:event_jButton3ActionPerformed
-
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // Detener el timer antes de cerrar
          if (timer != null) timer.stop();
         dispose();  // Cierra la ventana
     }//GEN-LAST:event_jButton2ActionPerformed
 
-    /**
-     * @param args the command line arguments
+    private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
+        registrarAccion(evt);
+// TODO add your handling code here:
+    }//GEN-LAST:event_jButton4ActionPerformed
+
+    /*
+     * @param  the command line arguments
      */
+    private void registrarEntrada() {
+    // Verificar que no haya una pendiente
+    try {
+        Asistencia pendiente = control.obtenerAsistenciaPendiente(codigoEmpleadoLogueado);
+        if (pendiente != null) {
+            JOptionPane.showMessageDialog(this,
+                    "Ya tiene una sesión activa. Registre la salida primero.",
+                    "Sesión Activa", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+    } catch (FachadaException ex) {
+        JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        return;
+    }
+
+    SimpleDateFormat sdfHora = new SimpleDateFormat("HH:mm");
+    String horaActual = sdfHora.format(new Date());
+    jFormattedTextField1.setText(horaActual);
+    horaEntradaRegistrada = horaActual;
+
+    SimpleDateFormat sdfFecha = new SimpleDateFormat("dd/MM/yyyy");
+    fechaActual = sdfFecha.format(new Date());
+    jLabel7.setText(fechaActual);
+
+    java.util.Calendar cal = java.util.Calendar.getInstance();
+    Fecha fecha = new Fecha(
+            cal.get(java.util.Calendar.DAY_OF_MONTH),
+            cal.get(java.util.Calendar.MONTH) + 1,
+            cal.get(java.util.Calendar.YEAR)
+    );
+    Asistencia asistencia = new Asistencia(codigoEmpleadoLogueado, fecha, horaActual);
+    asistencia.setEstado("PENDIENTE");
+    asistencia.setHoraSalida("");
+
+    try {
+        control.registrarAsistencia(asistencia);
+        asistenciaPendiente = asistencia;
+        jComboBox1.setSelectedItem("Salida");
+        jComboBox1.setEnabled(false);
+        jButton4.setEnabled(true);
+        JOptionPane.showMessageDialog(this,
+                "Entrada registrada a las " + horaActual + "\nFecha: " + fechaActual,
+                "Registro de Entrada", JOptionPane.INFORMATION_MESSAGE);
+    } catch (FachadaException ex) {
+        JOptionPane.showMessageDialog(this,
+                "Error al registrar entrada: " + ex.getMessage(),
+                "Error", JOptionPane.ERROR_MESSAGE);
+    }
+}
+
+private void registrarSalida() {
+    if (asistenciaPendiente == null) {
+        JOptionPane.showMessageDialog(this,
+                "No hay sesión activa. Registre la entrada primero.",
+                "Error", JOptionPane.WARNING_MESSAGE);
+        return;
+    }
+
+    int confirm = JOptionPane.showConfirmDialog(this,
+            "¿Seguro que desea registrar la salida?",
+            "Confirmar Salida",
+            JOptionPane.YES_NO_OPTION,
+            JOptionPane.QUESTION_MESSAGE);
+
+    if (confirm == JOptionPane.YES_OPTION) {
+        SimpleDateFormat sdfHora = new SimpleDateFormat("HH:mm");
+        String horaSalida = sdfHora.format(new Date());
+        jFormattedTextField2.setText(horaSalida);
+
+        asistenciaPendiente.setHoraSalida(horaSalida);
+        asistenciaPendiente.setEstado("PRESENTE");
+
+        try {
+            control.actualizarAsistencia(asistenciaPendiente);
+
+            jFormattedTextField1.setText("");
+            jFormattedTextField2.setText("");
+            horaEntradaRegistrada = null;
+            asistenciaPendiente = null;
+
+            jComboBox1.setSelectedItem("Entrada");
+            jComboBox1.setEnabled(true);
+            jButton4.setEnabled(true);
+
+            JOptionPane.showMessageDialog(this,
+                    "Salida registrada correctamente.",
+                    "Registro de Salida", JOptionPane.INFORMATION_MESSAGE);
+        } catch (FachadaException ex) {
+            JOptionPane.showMessageDialog(this,
+                    "Error al registrar salida: " + ex.getMessage(),
+                    "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+}
     public static void main(String args[]) {
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
@@ -394,9 +435,9 @@ public class VentanaPrincipalEmpleado extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
-    private javax.swing.JButton jButton3;
+    private javax.swing.JButton jButton4;
+    private javax.swing.JComboBox<String> jComboBox1;
     private javax.swing.JFormattedTextField jFormattedTextField1;
     private javax.swing.JFormattedTextField jFormattedTextField2;
     private javax.swing.JLabel jLabel1;
