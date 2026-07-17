@@ -293,6 +293,6 @@ public class Control {
             // Guardamos el código como "valor oculto" usando un objeto personalizado o un mapa
             modelo.addElement(texto);
         }
-        return modelo;
+        return modelo; //la clase faltante para que funcione en ...Ausencias empleado
     }
 }
